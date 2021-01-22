@@ -14,7 +14,6 @@ then
     # Properly expose avatars and custom assets
     rm -rf /shared/media/avatars
     ln -s ../seahub-data/avatars /shared/media
-    mkdir /shared/seahub-data/custom
     ln -s ../seahub-data/custom /shared/media
     
     # Expose configuration and data
@@ -23,6 +22,7 @@ then
     mv ./seafile-data /shared/seafile-data
     mv ./seahub-data /shared/seahub-data
     mkdir /shared/logs
+    mkdir /shared/seahub-data/custom
 else
     echo "Please remove the previous configuration before running this script."
     exit 1
