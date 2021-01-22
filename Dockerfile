@@ -1,4 +1,4 @@
-ARG VERSION=7.1.9
+ARG VERSION=8.0.2
 
 FROM debian:buster AS builder
 
@@ -9,8 +9,8 @@ RUN apt-get update -y && apt-get install -y \
     sudo
 
 # Build seafile
-RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/v${VERSION}/build3.sh
-RUN chmod u+x build3.sh && ./build3.sh $VERSION pro
+RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/master/build3.sh
+RUN chmod u+x build3.sh && ./build3.sh $VERSION server
 
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
@@ -22,7 +22,7 @@ WORKDIR /seafile
 RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 
 # Prepare media folder to be exposed
-RUN mv seafile-server-$VERSION/seahub/media .
+RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
 FROM debian:buster
 
@@ -31,10 +31,13 @@ ARG VERSION
 RUN apt-get update && apt-get install -y \
     sudo \
     procps \
+    libmariadb-dev \
     python3 \
     python3-setuptools \
     python3-ldap \
     python3-sqlalchemy \
+    # Mysql init script requirement only. Will probably be useless in the future
+    python3-pymysql \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
     libjpeg62-turbo \

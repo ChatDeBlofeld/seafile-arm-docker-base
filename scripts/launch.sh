@@ -13,6 +13,20 @@ then
     ln -s seafile-server-$VERSION seafile-server-latest
 fi
 
+if [ "$(cat /shared/media/version)" != "$VERSION" ]
+then
+    # Remove outdated media folder
+    rm -rf /shared/media
+
+    # Expose new media folder in the volume
+    cp -r ./media /shared/media
+
+    # Properly expose avatars and custom assets
+    rm -rf /shared/media/avatars
+    ln -s ../seahub-data/avatars /shared/media
+    ln -s ../seahub-data/custom /shared/media
+fi
+
 if [ ! -d "./conf" ]
 then
     # Link internal configuration and data folders with the volume
