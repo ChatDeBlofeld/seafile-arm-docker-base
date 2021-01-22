@@ -4,6 +4,8 @@
 
 Currently MySQL only.
 
+This project uses [a forked version]( https://github.com/ChatDeBlofeld/seafile-rpi ) of the [Seafile for Raspberry PI]( https://github.com/haiwen/seafile-rpi ) build script.
+
 ## Build
 
 Update the `USER` variable in the `build-image.sh` script, then run it.
