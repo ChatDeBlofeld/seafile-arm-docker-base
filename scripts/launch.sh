@@ -13,7 +13,7 @@ then
     ln -s seafile-server-$VERSION seafile-server-latest
 fi
 
-if [ "$(cat /shared/media/version)" != "$VERSION" ]
+if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$VERSION" ]]
 then
     # Remove outdated media folder
     rm -rf /shared/media
