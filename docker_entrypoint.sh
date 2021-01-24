@@ -22,4 +22,11 @@ do
     fi
 done
 
-su seafile -pPc /home/seafile/$1.sh
+if [ -d "/shared/conf" ]
+then
+    SCRIPT=launch
+else
+    SCRIPT=init
+fi
+
+su seafile -pPc "/home/seafile/$SCRIPT.sh $@"
