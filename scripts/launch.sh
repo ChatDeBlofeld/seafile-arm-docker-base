@@ -2,12 +2,6 @@
 
 cd /opt/seafile
 
-if [ ! -d "/shared/conf" ]
-then
-    echo "No configuration available. Please run init.sh first."
-    exit 1
-fi
-
 if [ ! -d "./seafile-server-latest" ]
 then
     ln -s seafile-server-$VERSION seafile-server-latest
