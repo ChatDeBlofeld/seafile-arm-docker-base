@@ -40,8 +40,11 @@ then
     ln -s /shared/logs .
 fi
 
-# Credentials in this file will be read at startup
-echo '{"email":"$SEAFILE_ADMIN_EMAIL", "password":"$SEAFILE_ADMIN_PASSWORD"}' > ./conf/admin.txt
+if [ "$AUTO" ]
+then
+    # Credentials in this file will be read at startup
+    echo '{"email":"$SEAFILE_ADMIN_EMAIL", "password":"$SEAFILE_ADMIN_PASSWORD"}' > ./conf/admin.txt
+fi
 
 # Needed for admin account set up
 ./seafile-server-latest/seafile.sh start
