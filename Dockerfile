@@ -1,4 +1,4 @@
-ARG VERSION=8.0.2
+ARG VERSION=8.0.3
 
 FROM debian:buster AS builder
 
