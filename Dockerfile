@@ -9,7 +9,7 @@ RUN apt-get update -y && apt-get install -y \
     sudo
 
 # Build seafile
-RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/master/build3.sh
+RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/v${VERSION}/build3.sh
 RUN chmod u+x build3.sh && ./build3.sh $VERSION server
 
 # Extract package
