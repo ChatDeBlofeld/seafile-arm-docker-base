@@ -1,21 +1,26 @@
 #!/bin/bash
 
+function print() {
+    echo "[Launch] $@"
+}
+
 cd /opt/seafile
 
 if [ ! -d "./seafile-server-latest" ]
 then
+    print "Making symlink to latest version"
     ln -s seafile-server-$VERSION seafile-server-latest
 fi
 
 if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$VERSION" ]]
 then
-    # Remove outdated media folder
+    print "Removing outdated media folder"
     rm -rf /shared/media
 
-    # Expose new media folder in the volume
+    print "Exposing new media folder in the volume"
     cp -r ./media /shared/media
 
-    # Properly expose avatars and custom assets
+    print "Properly expose avatars and custom assets"
     rm -rf /shared/media/avatars
     ln -s ../seahub-data/avatars /shared/media
     ln -s ../seahub-data/custom /shared/media
@@ -23,7 +28,7 @@ fi
 
 if [ ! -d "./conf" ]
 then
-    # Link internal configuration and data folders with the volume
+    print "Linking internal configuration and data folders with the volume"
     ln -s /shared/conf .
     ln -s /shared/ccnet .
     ln -s /shared/seafile-data .
@@ -32,10 +37,8 @@ then
     ln -s /shared/media ./seafile-server-latest/seahub
 fi
 
+print "Launching seafile"
 ./seafile-server-latest/seafile.sh start
 ./seafile-server-latest/seahub.sh start
 
-# Stop seafile server when stopping the container
-trap "{ ./seafile-server-latest/seahub.sh stop && ./seafile-server-latest/seafile.sh stop && exit 0; exit 1; }" SIGTERM
-
-tail -f /dev/null & wait
+print "Done"
