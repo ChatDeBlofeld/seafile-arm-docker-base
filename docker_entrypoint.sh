@@ -25,6 +25,21 @@ function rightsManagement() {
     done
 }
 
+function waitForDb() {
+    export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${VERSION}/seahub/thirdpart
+
+    python3 - <<PYTHON_SCRIPT
+import MySQLdb
+
+while True:
+    try:
+        db=MySQLdb.connect(host="${MYSQL_HOST}")
+    except MySQLdb.OperationalError as err:
+        if err.args[0] == 1045:
+            break
+PYTHON_SCRIPT
+}
+
 function detectAutoMode() {
     if [ "$MYSQL_USER_PASSWD" ]
     then
@@ -37,6 +52,7 @@ function detectAutoMode() {
 }
 
 rightsManagement
+waitForDb
 
 if [ ! -d "/shared/conf" ]
 then
