@@ -4,6 +4,23 @@ function print() {
     echo "[Init] $@"
 }
 
+function detectAutoMode() {
+    if [ "$MYSQL_USER_PASSWD" ]
+    then
+        print "Auto mode detected"
+        # Note: it's not possible to just call the script with "auto"
+        # and the server name in argument is never set anywhere thus
+        # it's basically useless.
+        # So just keep it that way and wait for fixes (if they happen)
+        AUTO="auto -n useless"
+    else
+        print "Manual mode detected"
+    fi
+}
+
+print "Waiting for db"
+/home/seafile/wait_for_db.sh
+detectAutoMode
 cd /opt/seafile
 
 print "Setting default environment"
@@ -15,7 +32,32 @@ cp -r ./media /shared/media
 ln -s /shared/media ./seafile-server-$VERSION/seahub
 
 print "Running installation script"
-./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO
+LOGFILE=./install.log
+./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
+
+# Handle db starting twice at init edge case 
+if [[ "$AUTO" && "$(grep -i 'failed' $LOGFILE)" ]]
+then
+    print "Installation failed. Maybe the db wasn't really ready?"
+
+    print "Cleaning failed configuration"
+    rm -rf ./conf
+    rm -rf ./ccnet
+    rm -rf ./seafile-data
+    rm -rf ./seahub-data
+
+    print "Waiting for db... again"
+    /home/seafile/wait_for_db.sh
+
+    print "Retrying install"
+    ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
+fi
+
+if [ "$(grep -Pi '(failed)|(missing)' $LOGFILE)" ]
+then
+    print "Something went wrong"
+    exit 1
+fi
 
 print "Properly expose avatars and custom assets"
 rm -rf /shared/media/avatars

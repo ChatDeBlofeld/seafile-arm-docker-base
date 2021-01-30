@@ -4,6 +4,8 @@ function print() {
     echo "[Launch] $@"
 }
 
+print "Waiting for db"
+/home/seafile/wait_for_db.sh
 cd /opt/seafile
 
 if [ ! -d "./seafile-server-latest" ]

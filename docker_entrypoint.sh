@@ -33,44 +33,18 @@ function rightsManagement() {
     done
 }
 
-function waitForDb() {
-    print "Waiting for db"
-    export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${VERSION}/seahub/thirdpart
-
-    python3 - <<PYTHON_SCRIPT
-import MySQLdb
-
-while True:
-    try:
-        db=MySQLdb.connect(host="${MYSQL_HOST}")
-    except MySQLdb.OperationalError as err:
-        if err.args[0] == 1045:
-            break
-PYTHON_SCRIPT
-}
-
-function detectAutoMode() {
-    if [ "$MYSQL_USER_PASSWD" ]
-    then
-        print "Auto mode detected"
-        # Note: it's not possible to just call the script with "auto"
-        # and the server name in argument is never set anywhere thus
-        # it's basically useless.
-        # So just keep it that way and wait for fixes (if they happen)
-        export AUTO="auto -n useless"
-    else
-        print "Manual mode detected"
-    fi
-}
-
 rightsManagement
-waitForDb
 
 if [ ! -d "/shared/conf" ]
 then
     print "No config found. Running init script"
-    detectAutoMode
     su seafile -pPc "/home/seafile/init.sh"
+
+    if [ $? != 0 ]
+    then
+        print "Init failed"
+        exit 1
+    fi
 fi
 
 print "Running launch script"
