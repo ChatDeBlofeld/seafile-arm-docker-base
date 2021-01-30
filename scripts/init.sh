@@ -47,8 +47,6 @@ then
     print "Cleaning failed configuration"
     rm -rf ./conf
     rm -rf ./ccnet
-    rm -rf ./seafile-data
-    rm -rf ./seahub-data
 
     print "Waiting for db... again"
     /home/seafile/wait_for_db.sh
