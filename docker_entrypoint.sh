@@ -33,6 +33,10 @@ function rightsManagement() {
     done
 }
 
+# Export database default location
+if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
+if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
+
 rightsManagement
 
 if [ ! -d "/shared/conf" ]

@@ -18,14 +18,18 @@ function detectAutoMode() {
     fi
 }
 
-print "Waiting for db"
-/home/seafile/wait_for_db.sh
-detectAutoMode
-cd /opt/seafile
-
 print "Setting default environment"
+if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
+if [ "$ENABLE_TLS" ]; then export ENABLE_TLS="s"; fi
+if [ ! "$CONTAINER_IP" ]; then export CONTAINER_IP=127.0.0.1; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
 if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
+
+print "Waiting for db"
+/home/seafile/wait_for_db.sh
+
+detectAutoMode
+cd /opt/seafile
 
 print "Exposing media folder in the volume"
 cp -r ./media /shared/media
@@ -90,16 +94,11 @@ fi
 
 if [ "$AUTO" ]
 then
-    print "Writing admin credentials to file"
+    print "Setting admin credentials"
     echo '{"email":"$SEAFILE_ADMIN_EMAIL", "password":"$SEAFILE_ADMIN_PASSWORD"}' > ./conf/admin.txt
 fi
 
-print "Starting seafile for admin account set up"
-./seafile-server-latest/seafile.sh start
-./seafile-server-latest/seahub.sh start
-
-print "Stopping seafile server"
-./seafile-server-latest/seahub.sh stop
-./seafile-server-latest/seafile.sh stop
+print "Writing configuration"
+/home/seafile/write_config.sh
 
 print "Done"
