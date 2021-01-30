@@ -40,7 +40,7 @@ LOGFILE=./install.log
 ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
 
 # Handle db starting twice at init edge case 
-if [[ "$AUTO" && "$(grep -i 'failed' $LOGFILE)" ]]
+if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -57,7 +57,7 @@ then
     ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
 fi
 
-if [ "$(grep -Pi '(failed)|(missing)' $LOGFILE)" ]
+if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
 then
     print "Something went wrong"
     exit 1
@@ -95,7 +95,7 @@ fi
 if [ "$AUTO" ]
 then
     print "Setting admin credentials"
-    echo '{"email":"$SEAFILE_ADMIN_EMAIL", "password":"$SEAFILE_ADMIN_PASSWORD"}' > ./conf/admin.txt
+    echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > ./conf/admin.txt
 fi
 
 print "Writing configuration"
