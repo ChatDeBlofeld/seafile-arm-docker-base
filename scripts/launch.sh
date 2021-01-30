@@ -4,6 +4,11 @@ function print() {
     echo "[Launch] $@"
 }
 
+print "Retrieving db location"
+CONFIG_FILE="/shared/conf/ccnet.conf"
+export MYSQL_HOST=$(grep -i host $CONFIG_FILE | cut -d '=' -f 2 | xargs)
+export MYSQL_PORT=$(grep -i port $CONFIG_FILE | cut -d '=' -f 2 | xargs)
+
 print "Waiting for db"
 /home/seafile/wait_for_db.sh
 cd /opt/seafile

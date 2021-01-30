@@ -22,6 +22,8 @@ print "Setting default environment"
 if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
 if [ "$ENABLE_TLS" ]; then export ENABLE_TLS="s"; fi
 if [ ! "$CONTAINER_IP" ]; then export CONTAINER_IP=127.0.0.1; fi
+if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
+if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
 if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
 
