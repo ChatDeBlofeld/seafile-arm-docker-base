@@ -28,11 +28,14 @@ if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
 if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
 
-print "Waiting for db"
-/home/seafile/wait_for_db.sh
-
 detectAutoMode
 cd /opt/seafile
+
+if [ "$AUTO" ]
+then
+    print "Waiting for db"
+    /home/seafile/wait_for_db.sh
+fi
 
 print "Exposing media folder in the volume"
 cp -r ./media /shared/media
@@ -97,9 +100,9 @@ if [ "$AUTO" ]
 then
     print "Setting admin credentials"
     echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > ./conf/admin.txt
-fi
 
-print "Writing configuration"
-/home/seafile/write_config.sh
+    print "Writing configuration"
+    /home/seafile/write_config.sh
+fi
 
 print "Done"
