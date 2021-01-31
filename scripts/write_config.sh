@@ -20,7 +20,7 @@ function writeCcnetConfig() {
 
 function writeGunicornSettings() {
     sed -ni '/8000/!p' $GUNICORN_CONFIG_FILE
-    echo "bind = \"${CONTAINER_IP}:8000\"" >> $GUNICORN_CONFIG_FILE
+    echo "bind = \"0.0.0.0:${SEAHUB_PORT}\"" >> $GUNICORN_CONFIG_FILE
 }
 
 function writeSeahubConfiguration() {

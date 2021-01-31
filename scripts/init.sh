@@ -5,7 +5,7 @@ function print() {
 }
 
 function detectAutoMode() {
-    if [ "$MYSQL_USER_PASSWD" ]
+    if [ "$SEAFILE_ADMIN_PASSWORD" ]
     then
         print "Auto mode detected"
         # Note: it's not possible to just call the script with "auto"
@@ -20,8 +20,9 @@ function detectAutoMode() {
 
 print "Setting default environment"
 if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
+if [ "$PORT" ]; then export SERVER_IP=${SERVER_IP}:${PORT}; fi
+if [ ! "$SEAHUB_PORT" ]; then export SEAHUB_PORT=8000; fi
 if [ "$ENABLE_TLS" ]; then export ENABLE_TLS="s"; fi
-if [ ! "$CONTAINER_IP" ]; then export CONTAINER_IP=127.0.0.1; fi
 if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
 if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
