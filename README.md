@@ -38,13 +38,15 @@ Example of run, see below for a more detailed description of the arguments:
 ```Bash
 $ docker run --rm -v /path/to/seafile/data/:/shared \
                   -p 8000:8000 -p 8082:8082 \
+                  -e PUID=1001 -e PGID=1001 \
                   -e SERVER_IP=cloud.my.domain \
                   -e ENABLE_TLS=true \
                   -e SEAFILE_ADMIN_EMAIL=me@my.domain \
                   -e SEAFILE_ADMIN_PASSWORD=secret \
                   -e MYSQL_HOST=db.hostname \
                   -e MYSQL_USER_PASSWD=secret \
-                  -e MYSQL_ROOT_PASSWD=secret
+                  -e MYSQL_ROOT_PASSWD=secret \
+                  franchetti/seafile-arm
 ```
 
 ### Persistency
@@ -72,7 +74,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 | Parameter | Description |
 |:-|:-|
 |`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. *Default: 1000*|
-|`GUID`| *(Optional)* Idem for group id. *Default: 1000* |
+|`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
@@ -81,7 +83,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`ENABLE_TLS`|*(Optional)* Set to non empty to enable https usage. *Default: empty string*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
-|`MYSQL_HOST`|*(Optional)* Location of the MySQL server. *Default: 127.0.0.1*|
+|`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks or host mode is probably the key here. *Default: 127.0.0.1*|
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
 |`MYSQL_USER`|*(Optional)* Standard user name. Will be granted admin permissions on all databases below. *Default: seafile*|
@@ -91,3 +93,23 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`CCNET_DB`|*(Optional)* Name of the ccnet db. *Default: ccnet_db*|
 |`SEAFILE_DB`|*(Optional)* Name of the seafile db. *Default: seafile_db*|
 |`SEAHUB_DB`|*(Optional)* Name of the seahub db. *Default: seahub_db*|
+
+### Manual setup 
+
+For manually setting up a server (for example if you refuse to expose some sensitive data in the environment), just run:
+
+```Bash
+$ docker run --rm -it -v /path/to/seafile/data/:/shared franchetti/seafile-arm
+```
+
+>Note: `PUID` and `PGID` parameters are harmless and still usable here if needed.
+
+After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run:
+
+```Bash
+$ docker run --rm -v /path/to/seafile/data/:/shared 
+                  -p 8000:8000 -p 8082:8082
+                  franchetti/seafile-arm
+```
+
+>Note: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
