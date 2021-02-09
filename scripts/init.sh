@@ -5,7 +5,7 @@ function print() {
 }
 
 function detectAutoMode() {
-    if [ "$SEAFILE_ADMIN_PASSWORD" ]
+    if [[ "$SEAFILE_ADMIN_EMAIL" && "$SEAFILE_ADMIN_PASSWORD" ]]
     then
         print "Auto mode detected"
         # Note: it's not possible to just call the script with "auto"
