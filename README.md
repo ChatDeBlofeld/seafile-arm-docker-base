@@ -79,8 +79,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
 |`FILESERVER_PORT`|*(Optional)* Port used by the file server service inside the container. *Default: 8082*|
-|`CONTAINER_IP`|*(Optional)* IP address **or** hostname of the container. Since it's recommended to use a web server (for example Nginx) in front of the Seafile server, it will probably not communicate with the container using the `SERVER_IP`. Thus this option is needed for proper binding. *Default: 127.0.0.1*|
-|`ENABLE_TLS`|*(Optional)* Set to non empty to enable https usage. *Default: empty string*|
+|`ENABLE_TLS`|*(Optional)* (0: Do not use TLS\|1: Use TLS) Enable https usage. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
 |`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks or host mode is probably the key here. *Default: 127.0.0.1*|
@@ -95,6 +94,8 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`SEAHUB_DB`|*(Optional)* Name of the seahub db. *Default: seahub_db*|
 
 ### Manual setup 
+
+>Note: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
 
 For manually setting up a server (for example if you refuse to expose some sensitive data in the environment), just run:
 
@@ -111,5 +112,3 @@ $ docker run --rm -v /path/to/seafile/data/:/shared
                   -p 8000:8000 -p 8082:8082
                   franchetti/seafile-arm
 ```
-
->Note: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
