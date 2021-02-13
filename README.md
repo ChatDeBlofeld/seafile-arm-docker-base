@@ -1,12 +1,10 @@
 # Seafile Docker image for ARM
 
-## About
-
 A [Docker image](https://hub.docker.com/r/franchetti/seafile-arm) of the [Seafile](https://www.seafile.com/en/home/)  data synchronization system targeting ARMv7 and ARM64 platforms, like Raspberry Pi or Pine 64 boards. 
 
 This repository is part of [a bigger project](https://github.com/ChatDeBlofeld/seafile-arm-docker) intended for bringing a full working Seafile environment (Seafile server, database server, web server with TLS support) in no time.
 
-The build step uses [a forked version]( https://github.com/ChatDeBlofeld/seafile-rpi ) of the [Seafile for Raspberry PI]( https://github.com/haiwen/seafile-rpi ) build script.
+The build step uses [a forked version](https://github.com/ChatDeBlofeld/seafile-rpi) of the [Seafile for Raspberry PI](https://github.com/haiwen/seafile-rpi) build script.
 
 ## Build
 
@@ -40,7 +38,7 @@ $ docker run --rm -v /path/to/seafile/data/:/shared \
                   -p 8000:8000 -p 8082:8082 \
                   -e PUID=1001 -e PGID=1001 \
                   -e SERVER_IP=cloud.my.domain \
-                  -e ENABLE_TLS=true \
+                  -e ENABLE_TLS=1 \
                   -e SEAFILE_ADMIN_EMAIL=me@my.domain \
                   -e SEAFILE_ADMIN_PASSWORD=secret \
                   -e MYSQL_HOST=db.hostname \
@@ -73,7 +71,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 
 | Parameter | Description |
 |:-|:-|
-|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. *Default: 1000*|
+|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://github.com/linuxserver/docker-swag#user--group-identifiers) taken from the *linuxserver* images. Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
@@ -112,3 +110,23 @@ $ docker run --rm -v /path/to/seafile/data/:/shared
                   -p 8000:8000 -p 8082:8082
                   franchetti/seafile-arm
 ```
+
+## Directory tree
+
+After the first run, the volume will be filled with the following directories:
+
+```
+volume_root
+├── ccnet
+├── conf
+├── logs
+├── media
+├── seafile-data
+└── seahub-data
+```
+
+## Customization
+
+By editing files in the `conf` folder, you should be able to customize your installation as described in the [Seafile manual](https://manual.seafile.com/). All functionalities haven't been tested though and may or may not work.
+
+>Performance hint: for few users, decrease the number of workers in `gunicorn.conf.py` for lower RAM usage.
