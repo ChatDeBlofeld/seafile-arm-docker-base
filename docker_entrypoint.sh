@@ -4,6 +4,12 @@ function print() {
     echo "[Entrypoint] $@"
 }
 
+function quit() {
+    ./seafile-server-latest/seahub.sh stop
+    ./seafile-server-latest/seafile.sh stop
+    exit
+}
+
 function rightsManagement() {
     print "Checking permissions"
     if [ "$PUID" == "" ]
@@ -33,9 +39,14 @@ function rightsManagement() {
     done
 }
 
+# Quit when receiving some signals
+trap quit SIGTERM
+trap quit SIGINT
+trap quit SIGKILL
+
 rightsManagement
 
-if [ ! -d "/shared/conf" ]
+if [ ! -f "/shared/conf/ccnet.conf" ]
 then
     print "No config found. Running init script"
     su seafile -pPc "/home/seafile/init.sh"
@@ -50,8 +61,5 @@ fi
 print "Running launch script"
 su seafile -pc "/home/seafile/launch.sh"
 
-# Stop seafile server when stopping the container
-trap "{ ./seafile-server-latest/seahub.sh stop && ./seafile-server-latest/seafile.sh stop && exit 0; exit 1; }" SIGTERM
-
-print "Waiting for SIGTERM"
+print "Waiting for termination"
 tail -f /dev/null & wait

@@ -44,7 +44,7 @@ then
 fi
 
 print "Exposing media folder in the volume"
-cp -r ./media /shared/media
+cp -r ./media /shared/
 ln -s /shared/media ./seafile-server-$VERSION/seahub
 
 print "Running installation script"
@@ -79,10 +79,9 @@ ln -s ../seahub-data/avatars /shared/media
 ln -s ../seahub-data/custom /shared/media
 
 print "Exposing configuration and data"
-mv ./conf /shared/conf
-mv ./ccnet /shared/ccnet
-mv ./seafile-data /shared/seafile-data
-mv ./seahub-data /shared/seahub-data
+cp -r ./conf /shared/ && rm -rf ./conf
+cp -r ./seafile-data /shared/ && rm -rf ./seafile-data
+cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
 mkdir /shared/logs
 mkdir /shared/seahub-data/custom
 
@@ -96,7 +95,6 @@ if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
     ln -s /shared/conf .
-    ln -s /shared/ccnet .
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .

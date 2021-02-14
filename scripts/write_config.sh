@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 CONFIG_DIR="./conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"

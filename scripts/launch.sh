@@ -15,10 +15,10 @@ fi
 if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$VERSION" ]]
 then
     print "Removing outdated media folder"
-    rm -rf /shared/media
+    rm -rf /shared/media/*
 
     print "Exposing new media folder in the volume"
-    cp -r ./media /shared/media
+    cp -r ./media /shared/
 
     print "Properly expose avatars and custom assets"
     rm -rf /shared/media/avatars
@@ -30,7 +30,7 @@ if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
     ln -s /shared/conf .
-    ln -s /shared/ccnet .
+    mkdir ccnet # Totally useless but still needed for the server to launch
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
