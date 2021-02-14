@@ -121,7 +121,6 @@ After the first run, the volume will be filled with the following directories:
 
 ```
 volume_root
-├── ccnet
 ├── conf
 ├── logs
 ├── media
