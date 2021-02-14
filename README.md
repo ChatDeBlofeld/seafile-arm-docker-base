@@ -36,17 +36,18 @@ Currently MySQL/MariaDB only.
 Example of run, see below for a more detailed description of the arguments:
 
 ```Bash
-$ docker run --rm -v /path/to/seafile/data/:/shared \
-                  -p 8000:8000 -p 8082:8082 \
-                  -e PUID=1001 -e PGID=1001 \
-                  -e SERVER_IP=cloud.my.domain \
-                  -e ENABLE_TLS=1 \
-                  -e SEAFILE_ADMIN_EMAIL=me@my.domain \
-                  -e SEAFILE_ADMIN_PASSWORD=secret \
-                  -e MYSQL_HOST=db.hostname \
-                  -e MYSQL_USER_PASSWD=secret \
-                  -e MYSQL_ROOT_PASSWD=secret \
-                  franchetti/seafile-arm
+$ docker run --rm -d --name seafile \
+             -v /path/to/seafile/data/:/shared \
+             -p 8000:8000 -p 8082:8082 \
+             -e PUID=1001 -e PGID=1001 \
+             -e SERVER_IP=cloud.my.domain \
+             -e ENABLE_TLS=1 \
+             -e SEAFILE_ADMIN_EMAIL=me@my.domain \
+             -e SEAFILE_ADMIN_PASSWORD=secret \
+             -e MYSQL_HOST=db.hostname \
+             -e MYSQL_USER_PASSWD=secret \
+             -e MYSQL_ROOT_PASSWD=secret \
+             franchetti/seafile-arm
 ```
 
 ### Persistency
@@ -82,7 +83,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`ENABLE_TLS`|*(Optional)* (0: Do not use TLS\|1: Use TLS) Enable https usage. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
-|`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks or host mode is probably the key here. *Default: 127.0.0.1*|
+|`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks or host mode are probably the key here. *Default: 127.0.0.1*|
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
 |`MYSQL_USER`|*(Optional)* Standard user name. Will be granted admin permissions on all databases below. *Default: seafile*|
@@ -95,7 +96,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 
 ### Manual setup 
 
->Note: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
+>Warning: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
 
 For manually setting up a server (for example if you refuse to expose some sensitive data in the environment), just run:
 
@@ -105,12 +106,13 @@ $ docker run --rm -it -v /path/to/seafile/data/:/shared franchetti/seafile-arm
 
 >Note: `PUID` and `PGID` parameters are harmless and still usable here if needed.
 
-After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run:
+After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run something like this:
 
 ```Bash
-$ docker run --rm -v /path/to/seafile/data/:/shared 
-                  -p 8000:8000 -p 8082:8082
-                  franchetti/seafile-arm
+$ docker run --rm -d --name seafile
+             -v /path/to/seafile/data/:/shared \
+             -p 8000:8000 -p 8082:8082 \
+             franchetti/seafile-arm
 ```
 
 ## Directory tree
