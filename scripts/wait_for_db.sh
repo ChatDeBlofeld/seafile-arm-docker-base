@@ -7,6 +7,7 @@ export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${VERSION}/seahub/th
 # Wait until the connection is refused for no password
 python3 - <<PYTHON_SCRIPT
 import MySQLdb
+from time import sleep
 
 while True:
     try:
@@ -14,4 +15,5 @@ while True:
     except MySQLdb.OperationalError as err:
         if err.args[0] == ${EXPECTED_ERROR_CODE}:
             break
+    sleep(1)
 PYTHON_SCRIPT
