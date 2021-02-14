@@ -59,4 +59,4 @@ COPY --chown=seafile:seafile scripts /home/seafile
 # Add version in container context
 ENV VERSION $VERSION
 
-CMD ["/docker_entrypoint.sh", "launch"]
+CMD ["/docker_entrypoint.sh"]
