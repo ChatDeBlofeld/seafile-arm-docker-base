@@ -29,7 +29,9 @@ $ ./build-image.sh -t 8 -t latest -l amd64
 
 ##  Run
 
-Currently MySQL only.
+Currently MySQL/MariaDB only.
+
+>Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
 
 Example of run, see below for a more detailed description of the arguments:
 
@@ -71,7 +73,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 
 | Parameter | Description |
 |:-|:-|
-|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://github.com/linuxserver/docker-swag#user--group-identifiers) taken from the *linuxserver* images. Default: 1000*|
+|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://github.com/linuxserver/docker-swag#user--group-identifiers) taken from the *linuxserver* images. *Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
