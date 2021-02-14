@@ -48,7 +48,7 @@ then
 fi
 
 print "Running launch script"
-su seafile -pPc "/home/seafile/launch.sh"
+su seafile -pc "/home/seafile/launch.sh"
 
 # Stop seafile server when stopping the container
 trap "{ ./seafile-server-latest/seahub.sh stop && ./seafile-server-latest/seafile.sh stop && exit 0; exit 1; }" SIGTERM

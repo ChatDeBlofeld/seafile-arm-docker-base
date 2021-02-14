@@ -18,6 +18,12 @@ function detectAutoMode() {
     fi
 }
 
+if [ "$SEAFILE_DIR" ] 
+then
+    print "Unsupported parameter: SEAFILE_DIR"
+    exit 1
+fi
+
 print "Setting default environment"
 if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
 if [ "$PORT" ]; then export SERVER_IP=${SERVER_IP}:${PORT}; fi
