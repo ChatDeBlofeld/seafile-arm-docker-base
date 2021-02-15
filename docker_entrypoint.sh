@@ -28,10 +28,10 @@ function rightsManagement() {
     groupmod -g $PGID seafile
     usermod -u $PUID seafile
 
-    dirs=("/home/seafile" "/opt/seafile" "/shared")
+    dirs=("/home/seafile" "/opt/seafile" "/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data")
     for dir in ${dirs[@]}
     do
-        if [[ "$(stat -c %u $dir)" != $PUID || "$(stat -c %g $dir)" != $PGID ]]
+        if [[ -d "$dir" && ("$(stat -c %u $dir)" != $PUID || "$(stat -c %g $dir)" != $PGID) ]]
         then
             print "Changing owner for $dir"
             chown -R seafile:seafile $dir
@@ -45,6 +45,13 @@ trap quit SIGINT
 trap quit SIGKILL
 
 rightsManagement
+
+if [ ! -d "/shared" ]
+then
+    mkdir /shared
+fi
+
+chown seafile:seafile /shared
 
 if [ ! -f "/shared/conf/ccnet.conf" ]
 then
