@@ -18,6 +18,12 @@ RUN mkdir seafile && mv seafile-server-$VERSION seafile
 
 WORKDIR /seafile
 
+# Additional dependencies
+RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
+    # Memcached
+    pylibmc \
+    django-pylibmc
+
 # Fix import not found when running seafile
 RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 
