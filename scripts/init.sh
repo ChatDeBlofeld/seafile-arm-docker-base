@@ -43,6 +43,12 @@ then
     /home/seafile/wait_for_db.sh
 fi
 
+if [ -d "/shared/media" ]
+then
+    print "Cleaning media folder"
+    rm -rf /shared/media
+fi
+
 print "Exposing media folder in the volume"
 cp -r ./media /shared/
 ln -s /shared/media ./seafile-server-$VERSION/seahub
