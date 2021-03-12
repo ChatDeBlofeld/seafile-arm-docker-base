@@ -6,7 +6,8 @@ ARG VERSION
 
 RUN apt-get update -y && apt-get install -y \
     wget \
-    sudo
+    sudo \
+    libmemcached-dev
 
 # Build seafile
 RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/v${VERSION}/build3.sh
@@ -19,8 +20,7 @@ RUN mkdir seafile && mv seafile-server-$VERSION seafile
 WORKDIR /seafile
 
 # Additional dependencies
-# TODO: move memcachedlib to line 7
-RUN apt-get install -y libmemcached-dev && python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
+RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
     # Memcached
     pylibmc \
     django-pylibmc
