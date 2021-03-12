@@ -19,7 +19,8 @@ RUN mkdir seafile && mv seafile-server-$VERSION seafile
 WORKDIR /seafile
 
 # Additional dependencies
-RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
+# TODO: move memcachedlib to line 7
+RUN apt-get install -y libmemcached-dev && python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
     # Memcached
     pylibmc \
     django-pylibmc
@@ -38,6 +39,7 @@ RUN apt-get update && apt-get install -y \
     sudo \
     procps \
     libmariadb-dev \
+    libmemcached11 \
     python3 \
     python3-setuptools \
     python3-ldap \
