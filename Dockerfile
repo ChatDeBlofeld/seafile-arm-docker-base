@@ -35,7 +35,7 @@ FROM debian:buster
 
 ARG VERSION
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     procps \
     libmariadb-dev \
@@ -51,7 +51,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo \
     libopenjp2-7 \
     libtiff5 \
-    libxcb1
+    libxcb1 && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
 

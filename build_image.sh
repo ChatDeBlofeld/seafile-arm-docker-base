@@ -39,8 +39,12 @@ fi
 docker buildx use $BUILDER
 
 # Fix docker multiarch building when host local IP changes
-docker restart $(docker ps -qf name=$BUILDER)
-sleep 2
+BUILDER_CONTAINER="$(docker ps -qf name=$BUILDER)"
+if [ ! -z "${BUILDER_CONTAINER}" ]; then
+  echo 'Restarting builder container..'
+  docker restart $(docker ps -qf name=$BUILDER)
+  sleep 2
+fi
 
 # Build image
 docker buildx build $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
