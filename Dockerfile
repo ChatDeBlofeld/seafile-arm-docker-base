@@ -25,9 +25,6 @@ RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --u
     pylibmc \
     django-pylibmc
 
-RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
-    moviepy
-
 # Fix import not found when running seafile
 RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 
@@ -41,7 +38,7 @@ ARG VERSION
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     procps \
-    libmariadb-dev \
+    libmariadbclient-dev \
     libmemcached11 \
     python3 \
     python3-setuptools \
