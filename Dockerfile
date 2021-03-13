@@ -49,6 +49,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-sqlalchemy \
     # Mysql init script requirement only. Will probably be useless in the future
     python3-pymysql \
+    ffmpeg \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
     libjpeg62-turbo \
