@@ -31,14 +31,14 @@ RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 # Prepare media folder to be exposed
 RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
-FROM debian:buster
+FROM debian:buster-slim
 
 ARG VERSION
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     procps \
-    libmariadb-dev \
+    libmariadbclient-dev \
     libmemcached11 \
     python3 \
     python3-setuptools \
@@ -51,7 +51,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo \
     libopenjp2-7 \
     libtiff5 \
-    libxcb1
+    libxcb1 && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
 
