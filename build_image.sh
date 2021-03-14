@@ -3,7 +3,7 @@
 DOCKERFILE_DIR="."
 MULTIARCH_PLATFORMS="linux/amd64,linux/arm/v7,linux/arm64"
 
-USER="kevinxw"
+USER="franchetti"
 IMAGE="seafile-arm"
 TAGS=""
 
