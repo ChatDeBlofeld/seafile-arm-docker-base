@@ -130,6 +130,6 @@ volume_root
 
 ## Customization
 
-By editing files in the `conf` folder, you should be able to customize your installation as described in the [Seafile manual](https://manual.seafile.com/). All functionalities haven't been tested though and may or may not work.
+By editing files in the `conf` folder, you should be able to customize your installation as described in the [Seafile manual](https://manual.seafile.com/). All functionalities haven't been tested though and may or may not work, consult the open issues to know if they're known issues about what your want to use.
 
 >Performance hint: for few users, decrease the number of workers in `gunicorn.conf.py` for lower RAM usage.
