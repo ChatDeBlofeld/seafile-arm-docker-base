@@ -8,7 +8,7 @@ The build step uses [a forked version](https://github.com/ChatDeBlofeld/seafile-
 
 ## Build
 
-Update the `USER` variable in the `build-image.sh` script, then run it. Current version on master is Seafile v8.0.3, for older builds, checkout on the proper tag.
+Update the `USER` variable in the `build-image.sh` script, then run it. Current version on master is Seafile v8.0.4, for older builds, checkout on the proper tag.
 
 Script usage:
 

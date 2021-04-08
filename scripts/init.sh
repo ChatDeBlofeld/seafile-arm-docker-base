@@ -33,6 +33,7 @@ if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
 if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
 if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
+if [ ! "$USE_EXISTING_DB" ]; then export USE_EXISTING_DB=0; fi
 
 detectAutoMode
 cd /opt/seafile
@@ -58,7 +59,7 @@ LOGFILE=./install.log
 ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO |& tee $LOGFILE
 
 # Handle db starting twice at init edge case 
-if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
+if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" && ! "$(grep -Pi 'already exists' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -68,6 +69,12 @@ then
 
     print "Waiting for db... again"
     /home/seafile/wait_for_db.sh
+
+    if [ "$USE_EXISTING_DB" = "0" ]
+    then
+        print "Cleaning old databases"
+        /home/seafile/clean_db.sh
+    fi
 
     print "Retrying install"
     ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE

@@ -1,4 +1,4 @@
-ARG VERSION=8.0.3
+ARG VERSION=8.0.4
 
 FROM debian:buster AS builder
 
@@ -38,7 +38,7 @@ ARG VERSION
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     procps \
-    libmariadbclient-dev \
+    libmariadb3 \
     libmemcached11 \
     python3 \
     python3-setuptools \
