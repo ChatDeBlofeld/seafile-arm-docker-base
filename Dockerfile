@@ -51,7 +51,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libjpeg62-turbo \
     libopenjp2-7 \
     libtiff5 \
-    libxcb1 && \
+    libxcb1 
+    libfreetype6 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
