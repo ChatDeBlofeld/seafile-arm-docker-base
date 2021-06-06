@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function print() {
-    echo "[Entrypoint] $@"
+    echo "$(date -Iseconds) [Entrypoint] $@"
 }
 
 function quit() {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function print() {
-    echo "[Launch] $@"
+    echo "$(date -Iseconds) [Launch] $@"
 }
 
 cd /opt/seafile

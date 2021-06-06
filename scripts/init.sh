@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function print() {
-    echo "[Init] $@"
+    echo "$(date -Iseconds) [Init] $@"
 }
 
 function detectAutoMode() {
