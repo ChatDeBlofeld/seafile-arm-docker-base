@@ -59,7 +59,7 @@ LOGFILE=./install.log
 ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO |& tee $LOGFILE
 
 # Handle db starting twice at init edge case 
-if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" && ! "$(grep -Pi 'already exists' $LOGFILE)" ]]
+if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
