@@ -47,7 +47,7 @@ fi
 if [ -d "/shared/media" ]
 then
     print "Cleaning media folder"
-    rm -rf /shared/media
+    rm -rf /shared/media/*
 fi
 
 print "Exposing media folder in the volume"
@@ -92,10 +92,15 @@ ln -s ../seahub-data/avatars /shared/media
 ln -s ../seahub-data/custom /shared/media
 
 print "Exposing configuration and data"
+# Use cp and not move for multiple volume mapping compatibility
 cp -r ./conf /shared/ && rm -rf ./conf
 cp -r ./seafile-data /shared/ && rm -rf ./seafile-data
 cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
-mkdir /shared/logs
+# Avoid unnecessary error line when the folder is already created by a volume mapping
+if [ ! -d "/shared/logs" ]
+then
+    mkdir /shared/logs
+fi
 mkdir /shared/seahub-data/custom
 
 if [ ! -d "./seafile-server-latest" ]
