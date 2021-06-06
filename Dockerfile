@@ -44,6 +44,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-setuptools \
     python3-ldap \
     python3-sqlalchemy \
+    # Improve Mysql 8 suppport
+    python3-cryptography \
     # Mysql init script requirement only. Will probably be useless in the future
     python3-pymysql \
     # Folowing libs are useful for the armv7 arch only
