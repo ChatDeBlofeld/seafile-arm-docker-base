@@ -70,12 +70,13 @@ In bridge mode (default), some ports have to be published for the host to reach 
 
 ### Parameters
 
-All these parameters have to be passed as environment variables. Except for `PUID` and `GUID`, they're useful for initialization only (first run) and can be removed afterwards (even mandatory ones).
+All these parameters have to be passed as environment variables. Except for `PUID`, `GUID` and `TZ`, they're useful for initialization only (first run) and can be removed afterwards (even mandatory ones).
 
 | Parameter | Description |
 |:-|:-|
 |`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://github.com/linuxserver/docker-swag#user--group-identifiers) taken from the *linuxserver* images. *Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
+|`TZ`| *(Optional)* Set the timezone of the container. *Default: UTC* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
@@ -104,7 +105,7 @@ For manually setting up a server (for example if you refuse to expose some sensi
 $ docker run --rm -it -v /path/to/seafile/data/:/shared franchetti/seafile-arm
 ```
 
->Note: `PUID` and `PGID` parameters are harmless and still usable here if needed.
+>Note: `PUID`, `PGID` and `TZ` parameters are harmless and still usefull here if needed.
 
 After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run something like this:
 
