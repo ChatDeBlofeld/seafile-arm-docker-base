@@ -8,12 +8,12 @@ The build step uses [a forked version](https://github.com/ChatDeBlofeld/seafile-
 
 ## Build
 
-Update the `USER` variable in the `build-image.sh` script, then run it. Current version on master is Seafile v8.0.4, for older builds, checkout on the proper tag.
+Update the `USER` variable in the `build-image.sh` script, then run it. Current version on master is Seafile v8.0.5, for older builds, checkout on the proper tag.
 
 Script usage:
 
 ```
-build-image.sh [OPTIONS]
+build_image.sh [OPTIONS]
 
 Options:
     -t              Add a tag. Can be used several times.
@@ -24,7 +24,7 @@ Options:
 Example:
 
 ```Bash
-$ ./build-image.sh -t 8 -t latest -l amd64
+$ ./build_image.sh -t 8 -t latest -l amd64
 ```
 
 ##  Run
