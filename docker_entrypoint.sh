@@ -10,6 +10,19 @@ function quit() {
     exit
 }
 
+function timezoneAdjustement() {
+    if [ "$TZ" ]
+    then
+        if [ ! -f "/usr/share/zoneinfo/$TZ" ]
+        then
+            print "Invalid timezone $TZ"
+        else
+            ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+            print "Local time set to $TZ"
+        fi
+    fi
+}
+
 function rightsManagement() {
     print "Checking permissions"
     if [ "$PUID" == "" ]
@@ -44,6 +57,7 @@ trap quit SIGTERM
 trap quit SIGINT
 trap quit SIGKILL
 
+timezoneAdjustement
 rightsManagement
 
 if [ ! -d "/shared" ]
