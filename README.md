@@ -8,7 +8,7 @@ The build step uses [a forked version](https://github.com/ChatDeBlofeld/seafile-
 
 ## Build
 
-Update the `USER` variable in the `build-image.sh` script, then run it. Current version on master is Seafile v8.0.5, for older builds, checkout on the proper tag.
+Update the `USER` variable in the `build-image.sh` script, this will set the repository of your image to `$USER/seafile-arm`. Then run the script. Current version on master is Seafile v8.0.5, for older builds, checkout on the proper tag.
 
 Script usage:
 
@@ -18,6 +18,10 @@ build_image.sh [OPTIONS]
 Options:
     -t              Add a tag. Can be used several times.
     -l <platform>   Load to the local images. One <platform> at time only.
+                    <platform> working choices are: 
+                        arm/v7 
+                        arm64 
+                        amd64
     -p              Push the image(s) to the remote registry. Incompatible with -l
 ```
 
@@ -31,6 +35,8 @@ $ ./build_image.sh -t 8 -t latest -l amd64
 
 Currently MySQL/MariaDB only.
 
+>Note: SQLite suport [planned](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/8), no expected date thought.
+
 >Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
 
 Example of run, see below for a more detailed description of the arguments:
@@ -40,6 +46,7 @@ $ docker run --rm -d --name seafile \
              -v /path/to/seafile/data/:/shared \
              -p 8000:8000 -p 8082:8082 \
              -e PUID=1001 -e PGID=1001 \
+             -e TZ=Europe/Zurich
              -e SERVER_IP=cloud.my.domain \
              -e ENABLE_TLS=1 \
              -e SEAFILE_ADMIN_EMAIL=me@my.domain \
@@ -74,7 +81,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 
 | Parameter | Description |
 |:-|:-|
-|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://github.com/linuxserver/docker-swag#user--group-identifiers) taken from the *linuxserver* images. *Default: 1000*|
+|`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://docs.linuxserver.io/general/understanding-puid-and-pgid) taken from the *linuxserver* images. *Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`TZ`| *(Optional)* Set the timezone of the container. *Default: UTC* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
@@ -84,7 +91,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`ENABLE_TLS`|*(Optional)* (0: Do not use TLS\|1: Use TLS) Enable https usage. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
-|`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks or host mode are probably the key here. *Default: 127.0.0.1*|
+|`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks is probably the key here. *Default: 127.0.0.1*|
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
 |`MYSQL_USER`|*(Optional)* Standard user name. Will be granted admin permissions on all databases below. *Default: seafile*|
@@ -113,6 +120,7 @@ After submiting the admin credentials, configure the server by editing what you 
 $ docker run --rm -d --name seafile
              -v /path/to/seafile/data/:/shared \
              -p 8000:8000 -p 8082:8082 \
+             -e TZ=Europe/Zurich \
              franchetti/seafile-arm
 ```
 
