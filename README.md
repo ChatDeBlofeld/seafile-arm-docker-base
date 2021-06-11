@@ -75,6 +75,8 @@ In bridge mode (default), some ports have to be published for the host to reach 
 -p 8000:8000 -p 8082:8082
 ```
 
+The installation is auto-configured and ready to be used behind Apache/Nginx, [as recommended in the manual](https://manual.seafile.com/deploy/using_mysql/#starting-seafile-server-and-seahub-website).
+
 ### Parameters
 
 All these parameters have to be passed as environment variables. Except for `PUID`, `GUID` and `TZ`, they're useful for initialization only (first run) and can be removed afterwards (even mandatory ones).
