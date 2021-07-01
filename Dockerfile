@@ -1,17 +1,40 @@
-ARG VERSION=8.0.5
+ARG VERSION
 
 FROM debian:buster AS builder
 
 ARG VERSION
+ARG PYTHON_REQUIREMENTS_URL_SEAHUB
+ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 RUN apt-get update -y && apt-get install -y \
     wget \
     sudo \
     libmemcached-dev
 
+# Retrieve seafile build script
+RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
+RUN chmod u+x build3.sh
+
+# Build each component separately for better cache and easy debug in case of failure
+
+# Install dependencies and thirdparty requirements
+RUN ./build3.sh -D -v $VERSION \
+    -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
+    -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
+# Build libevhtp
+RUN ./build3.sh -1 -v $VERSION
+# Build libsearpc
+RUN ./build3.sh -2 -v $VERSION
 # Build seafile
-RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/v${VERSION}/build3.sh
-RUN chmod u+x build3.sh && ./build3.sh $VERSION server
+RUN ./build3.sh -3 -v $VERSION
+# Build seahub
+RUN ./build3.sh -4 -v $VERSION
+# Build seafobj
+RUN ./build3.sh -5 -v $VERSION
+# Build seafdav
+RUN ./build3.sh -6 -v $VERSION
+# Build Seafile server
+RUN ./build3.sh -7 -v $VERSION
 
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz

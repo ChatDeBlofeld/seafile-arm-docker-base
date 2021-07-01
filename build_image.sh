@@ -3,17 +3,29 @@
 DOCKERFILE_DIR="."
 MULTIARCH_PLATFORMS="linux/amd64,linux/arm/v7,linux/arm64"
 
-USER="franchetti"
+VERSION="8.0.5"
+PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
+PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
+
+REGISTRY=""
+REPOSITORY="franchetti"
 IMAGE="seafile-arm"
 TAGS=""
 
 OUTPUT=""
-while getopts t:v:l:p flag
+while getopts r:u:i:t:v:h:d:l:p flag
 do
     case "${flag}" in
-        t) TAGS="$TAGS -t $USER/$IMAGE:$OPTARG";;
+        r) REGISTRY="$OPTARG/";;
+        u) REPOSITORY=$OPTARG;;
+        i) IMAGE=$OPTARG;;
+        t) TAGS="$TAGS -t $REGISTRY$REPOSITORY/$IMAGE:$OPTARG";;
         p) OUTPUT="--push";;
+        P) MULTIARCH_PLATFORMS=$OPTARG;;
         l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
+        v) VERSION=$OPTARG;;
+        h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
+        d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
         :) exit;;
         \?) exit;; 
     esac
@@ -21,9 +33,6 @@ done
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR
-
-# Enable use of docker buildx
-export DOCKER_CLI_EXPERIMENTAL=enabled
 
 # Register qemu handlers
 docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
@@ -47,6 +56,8 @@ if [ ! -z "${BUILDER_CONTAINER}" ]; then
 fi
 
 # Build image
-docker buildx build $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
-
-export DOCKER_CLI_EXPERIMENTAL=disabled
+docker buildx build \
+    --build-arg VERSION=$VERSION \
+    --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB=$PYTHON_REQUIREMENTS_URL_SEAHUB \
+    --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV=$PYTHON_REQUIREMENTS_URL_SEAFDAV \
+    $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
