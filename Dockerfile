@@ -54,7 +54,7 @@ RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 # Prepare media folder to be exposed
 RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
-COPY customs/setup-seafile-mysql.py seafile-server-$VERSION/
+COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/
 
 FROM debian:buster-slim
 
