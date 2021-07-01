@@ -4,13 +4,11 @@ A [Docker image](https://hub.docker.com/r/franchetti/seafile-arm) of the [Seafil
 
 This repository is part of [a bigger project](https://github.com/ChatDeBlofeld/seafile-arm-docker) intended for bringing a full working Seafile environment (Seafile server, database server, web server with TLS support) in no time.
 
-The build step uses [a forked version](https://github.com/ChatDeBlofeld/seafile-rpi) of the [Seafile for Raspberry PI](https://github.com/haiwen/seafile-rpi) build script.
+The build step uses the great [Seafile for Raspberry PI](https://github.com/haiwen/seafile-rpi) build script.
 
 ## Build
 
-Update the `USER` variable in the `build-image.sh` script, this will set the repository of your image to `$USER/seafile-arm`. Then run the script. Current version on master is Seafile v8.0.5, for older builds, checkout on the proper tag.
-
-Script usage:
+> Warning: you'll probably have to deal with the -h/-d options to get something working. [This repository](https://github.com/jobenvil/rpi-build-seafile) can help.
 
 ```
 build_image.sh [OPTIONS]
@@ -18,11 +16,19 @@ build_image.sh [OPTIONS]
 Options:
     -t              Add a tag. Can be used several times.
     -l <platform>   Load to the local images. One <platform> at time only.
-                    <platform> working choices are: 
+                    <platform> working choices can be: 
                         arm/v7 
                         arm64 
                         amd64
-    -p              Push the image(s) to the remote registry. Incompatible with -l
+    -p              Push the image(s) to the remote registry. Incompatible with -l.
+    -P              Override the default platform list. Incompatible with -l.
+                    (default: linux/amd64,linux/arm/v7,linux/arm64)
+    -v              Set seafile server version to build (default: 8.0.5)
+    -h              Set python requirement file for seahub (default: official requirement file)
+    -d              Set python requirement file for seafdav (default: official requirement file)
+    -r              Registry to which upload the image (default: Docker Hub)
+    -u              Repository to which upload the image (default: my Docker Hub username)
+    -i              Image name (default: seafile-arm)
 ```
 
 Example:
@@ -35,7 +41,7 @@ $ ./build_image.sh -t 8 -t latest -l amd64
 
 Currently MySQL/MariaDB only.
 
->Note: SQLite suport [planned](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/8), no expected date thought.
+>Note: SQLite support [planned](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/8), no expected date thought.
 
 >Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
 
