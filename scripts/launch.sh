@@ -9,10 +9,10 @@ cd /opt/seafile
 if [ ! -d "./seafile-server-latest" ]
 then
     print "Making symlink to latest version"
-    ln -s seafile-server-$VERSION seafile-server-latest
+    ln -s seafile-server-$SEAFILE_SERVER_VERSION seafile-server-latest
 fi
 
-if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$VERSION" ]]
+if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$SEAFILE_SERVER_VERSION" ]]
 then
     print "Removing outdated media folder"
     rm -rf /shared/media/*

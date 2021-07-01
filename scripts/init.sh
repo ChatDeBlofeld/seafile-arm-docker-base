@@ -52,11 +52,11 @@ fi
 
 print "Exposing media folder in the volume"
 cp -r ./media /shared/
-ln -s /shared/media ./seafile-server-$VERSION/seahub
+ln -s /shared/media ./seafile-server-$SEAFILE_SERVER_VERSION/seahub
 
 print "Running installation script"
 LOGFILE=./install.log
-./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO |& tee $LOGFILE
+./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.sh $AUTO |& tee $LOGFILE
 
 # Handle db starting twice at init edge case 
 if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
@@ -77,7 +77,7 @@ then
     fi
 
     print "Retrying install"
-    ./seafile-server-$VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
+    ./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
 fi
 
 if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
@@ -106,7 +106,7 @@ mkdir /shared/seahub-data/custom
 if [ ! -d "./seafile-server-latest" ]
 then
     print "Making symlink to latest version"
-    ln -s seafile-server-$VERSION seafile-server-latest
+    ln -s seafile-server-$SEAFILE_SERVER_VERSION seafile-server-latest
 fi
 
 if [ ! -d "./conf" ]

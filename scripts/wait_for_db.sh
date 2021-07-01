@@ -2,7 +2,7 @@
 
 EXPECTED_ERROR_CODE=1045
 
-export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${VERSION}/seahub/thirdpart
+export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${SEAFILE_SERVER_VERSION}/seahub/thirdpart
 
 # Wait until the connection is refused for no password
 python3 - <<PYTHON_SCRIPT
