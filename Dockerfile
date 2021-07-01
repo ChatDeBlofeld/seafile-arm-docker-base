@@ -31,6 +31,8 @@ RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 # Prepare media folder to be exposed
 RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
+COPY customs/setup-seafile-mysql.py seafile-server-$VERSION/
+
 FROM debian:buster-slim
 
 ARG VERSION
@@ -46,8 +48,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-sqlalchemy \
     # Improve Mysql 8 suppport
     python3-cryptography \
-    # Mysql init script requirement only. Will probably be useless in the future
-    python3-pymysql \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
     libjpeg62-turbo \
