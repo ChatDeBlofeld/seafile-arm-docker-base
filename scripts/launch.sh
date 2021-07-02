@@ -30,11 +30,17 @@ if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
     ln -s /shared/conf .
-    mkdir ccnet # Totally useless but still needed for the server to launch
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
     ln -s /shared/media ./seafile-server-latest/seahub
+    if [ "$SQLITE" == "1" ]
+    then 
+        ln -s /shared/sqlite ./ccnet
+        ln -s /shared/sqlite/seahub.db .
+    else
+        mkdir ccnet # Totally useless but still needed for the server to launch
+    fi
 fi
 
 print "Launching seafile"

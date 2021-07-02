@@ -35,10 +35,19 @@ if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
 if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
 if [ ! "$USE_EXISTING_DB" ]; then export USE_EXISTING_DB=0; fi
 
+if [ "$SQLITE" != "1" ]
+then 
+    print "Using MySQL/MariaDB setup"
+    MYSQL="-mysql"
+    SQLITE=""
+else
+    print "Using SQLite setup"
+fi
+
 detectAutoMode
 cd /opt/seafile
 
-if [ "$AUTO" ]
+if [[ "$AUTO" && ! "$SQLITE" ]]
 then
     print "Waiting for db"
     /home/seafile/wait_for_db.sh
@@ -56,10 +65,10 @@ ln -s /shared/media ./seafile-server-$SEAFILE_SERVER_VERSION/seahub
 
 print "Running installation script"
 LOGFILE=./install.log
-./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.sh $AUTO |& tee $LOGFILE
+./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE
 
 # Handle db starting twice at init edge case 
-if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
+if [[ "$AUTO" && ! "$SQLITE" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -96,12 +105,19 @@ print "Exposing configuration and data"
 cp -r ./conf /shared/ && rm -rf ./conf
 cp -r ./seafile-data /shared/ && rm -rf ./seafile-data
 cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
-# Avoid unnecessary error line when the folder is already created by a volume mapping
-if [ ! -d "/shared/logs" ]
-then
-    mkdir /shared/logs
-fi
 mkdir /shared/seahub-data/custom
+# Avoid unnecessary error line when the folder is already created by a volume mapping
+if [ ! -d "/shared/logs" ]; then mkdir /shared/logs; fi
+# Expose sqlite db
+if [ "$SQLITE" ]
+then 
+    if [ ! -d "/shared/sqlite" ]; then mkdir /shared/sqlite; fi
+    mv ./seahub.db /shared/sqlite/
+    mv /shared/seafile-data/seafile.db /shared/sqlite/
+    mv ./ccnet/* /shared/sqlite/
+    rm -rf ./ccnet
+fi
+
 
 if [ ! -d "./seafile-server-latest" ]
 then
@@ -116,6 +132,12 @@ then
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
+    if [ "$SQLITE" ]
+    then 
+        ln -s /shared/sqlite ./ccnet
+        ln -s ../sqlite/seafile.db /shared/seafile-data/
+        ln -s /shared/sqlite/seahub.db .
+    fi
 fi
 
 if [ "$AUTO" ]
