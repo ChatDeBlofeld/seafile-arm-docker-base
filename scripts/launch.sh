@@ -34,7 +34,7 @@ then
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
     ln -s /shared/media ./seafile-server-latest/seahub
-    if [ "$SQLITE" == "1" ]
+    if [ -d "/shared/sqlite" ]
     then 
         ln -s /shared/sqlite ./ccnet
         ln -s /shared/sqlite/seahub.db .
