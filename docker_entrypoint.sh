@@ -41,7 +41,7 @@ function rightsManagement() {
     groupmod -g $PGID seafile
     usermod -u $PUID seafile
 
-    dirs=("/home/seafile" "/opt/seafile" "/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data")
+    dirs=("/home/seafile" "/opt/seafile" "/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
     for dir in ${dirs[@]}
     do
         if [[ -d "$dir" && ("$(stat -c %u $dir)" != $PUID || "$(stat -c %g $dir)" != $PGID) ]]

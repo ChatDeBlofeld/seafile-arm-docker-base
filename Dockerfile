@@ -1,17 +1,40 @@
-ARG VERSION=8.0.5
+ARG VERSION
 
 FROM debian:buster AS builder
 
 ARG VERSION
+ARG PYTHON_REQUIREMENTS_URL_SEAHUB
+ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 RUN apt-get update -y && apt-get install -y \
     wget \
     sudo \
     libmemcached-dev
 
+# Retrieve seafile build script
+RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
+RUN chmod u+x build3.sh
+
+# Build each component separately for better cache and easy debug in case of failure
+
+# Install dependencies and thirdparty requirements
+RUN ./build3.sh -D -v $VERSION \
+    -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
+    -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
+# Build libevhtp
+RUN ./build3.sh -1 -v $VERSION
+# Build libsearpc
+RUN ./build3.sh -2 -v $VERSION
 # Build seafile
-RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/v${VERSION}/build3.sh
-RUN chmod u+x build3.sh && ./build3.sh $VERSION server
+RUN ./build3.sh -3 -v $VERSION
+# Build seahub
+RUN ./build3.sh -4 -v $VERSION
+# Build seafobj
+RUN ./build3.sh -5 -v $VERSION
+# Build seafdav
+RUN ./build3.sh -6 -v $VERSION
+# Build Seafile server
+RUN ./build3.sh -7 -v $VERSION
 
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
@@ -31,6 +54,8 @@ RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
 # Prepare media folder to be exposed
 RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
+COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/
+
 FROM debian:buster-slim
 
 ARG VERSION
@@ -38,6 +63,7 @@ ARG VERSION
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     procps \
+    sqlite3 \
     libmariadb3 \
     libmemcached11 \
     python3 \
@@ -46,8 +72,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-sqlalchemy \
     # Improve Mysql 8 suppport
     python3-cryptography \
-    # Mysql init script requirement only. Will probably be useless in the future
-    python3-pymysql \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
     libjpeg62-turbo \
@@ -69,6 +93,6 @@ COPY docker_entrypoint.sh /
 COPY --chown=seafile:seafile scripts /home/seafile
 
 # Add version in container context
-ENV VERSION $VERSION
+ENV SEAFILE_SERVER_VERSION $VERSION
 
 CMD ["/docker_entrypoint.sh"]

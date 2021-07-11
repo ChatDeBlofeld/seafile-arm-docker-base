@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${VERSION}/seahub/thirdpart
+export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${SEAFILE_SERVER_VERSION}/seahub/thirdpart
 
 if [ ! "$CCNET_DB" ]; then CCNET_DB="ccnet_db"; fi
 if [ ! "$SEAFILE_DB" ]; then SEAFILE_DB="seafile_db"; fi
