@@ -48,13 +48,10 @@ RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --u
     pylibmc \
     django-pylibmc
 
-# Fix import not found when running seafile
-RUN ln -s python3.7 seafile-server-$VERSION/seafile/lib/python3.6
-
 # Prepare media folder to be exposed
 RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
-COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/
+COPY custom/setup-seafile-mysql.py.patch seafile-server-$VERSION/setup-seafile-mysql.py
 
 FROM debian:buster-slim
 
