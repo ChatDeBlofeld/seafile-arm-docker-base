@@ -39,12 +39,6 @@ $ ./build_image.sh -t 8 -t latest -l amd64
 
 ##  Run
 
-Currently MySQL/MariaDB only.
-
->Note: SQLite support [planned](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/8), no expected date thought.
-
->Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
-
 Example of run, see below for a more detailed description of the arguments:
 
 ```Bash
@@ -92,6 +86,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://docs.linuxserver.io/general/understanding-puid-and-pgid) taken from the *linuxserver* images. *Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`TZ`| *(Optional)* Set the timezone of the container. *Default: UTC* |
+|`SQLITE`| *(Optional)* (0: MySQL/MariaDB setup\|1: SQLite setup) Set the setup script to use. *Default: 0* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
@@ -99,6 +94,16 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`ENABLE_TLS`|*(Optional)* (0: Do not use TLS\|1: Use TLS) Enable https usage. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
+
+
+#### MySQL/MariaDB specific parameters
+
+I you want a MySQ/MariaDB deployment, you'll have to/can deal with some additional parameters.
+
+>Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
+
+| Parameter | Description |
+|:-|:-|
 |`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks is probably the key here. *Default: 127.0.0.1*|
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
@@ -117,10 +122,10 @@ All these parameters have to be passed as environment variables. Except for `PUI
 For manually setting up a server (for example if you refuse to expose some sensitive data in the environment), just run:
 
 ```Bash
-$ docker run --rm -it -v /path/to/seafile/data/:/shared franchetti/seafile-arm
+$ docker run --rm -it -e SQLITE=0 -v /path/to/seafile/data/:/shared franchetti/seafile-arm
 ```
 
->Note: `PUID`, `PGID` and `TZ` parameters are harmless and still usefull here if needed.
+>Note: `PUID`, `PGID` and `TZ` parameters are harmless and still useful here if needed.
 
 After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run something like this:
 
@@ -142,7 +147,8 @@ volume_root
 ├── logs
 ├── media
 ├── seafile-data
-└── seahub-data
+├── seahub-data
+└── sqlite (SQLite installation only)
 ```
 
 ## Customization
