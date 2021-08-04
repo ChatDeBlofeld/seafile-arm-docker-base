@@ -3,7 +3,7 @@
 DOCKERFILE_DIR="."
 MULTIARCH_PLATFORMS="linux/amd64,linux/arm/v7,linux/arm64"
 
-VERSION="8.0.5"
+VERSION="8.0.6"
 PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
 PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
 
@@ -23,7 +23,10 @@ do
         p) OUTPUT="--push";;
         P) MULTIARCH_PLATFORMS=$OPTARG;;
         l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
-        v) VERSION=$OPTARG;;
+        v) VERSION=$OPTARG
+           PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
+           PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
+           ;;
         h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
         :) exit;;

@@ -23,7 +23,7 @@ Options:
     -p              Push the image(s) to the remote registry. Incompatible with -l.
     -P              Override the default platform list. Incompatible with -l.
                     (default: linux/amd64,linux/arm/v7,linux/arm64)
-    -v              Set seafile server version to build (default: 8.0.5)
+    -v              Set seafile server version to build (default: 8.0.6)
     -h              Set python requirement file for seahub (default: official requirement file)
     -d              Set python requirement file for seafdav (default: official requirement file)
     -r              Registry to which upload the image (default: Docker Hub)
