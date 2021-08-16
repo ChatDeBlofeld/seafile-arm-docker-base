@@ -28,7 +28,7 @@ print "Setting default environment"
 if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
 if [ "$PORT" ]; then export SERVER_IP=${SERVER_IP}:${PORT}; fi
 if [ ! "$SEAHUB_PORT" ]; then export SEAHUB_PORT=8000; fi
-if [ "$ENABLE_TLS" == "1" ]; then export HTTPS_SUFFIX="s"; fi
+if [ "$USE_HTTPS" == "1" ]; then export HTTPS_SUFFIX="s"; fi
 if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
 if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
 if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi

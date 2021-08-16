@@ -3,7 +3,7 @@
 DOCKERFILE_DIR="."
 MULTIARCH_PLATFORMS="linux/amd64,linux/arm/v7,linux/arm64"
 
-VERSION="8.0.6"
+VERSION="8.0.7"
 PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
 PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
 

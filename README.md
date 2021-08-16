@@ -23,7 +23,7 @@ Options:
     -p              Push the image(s) to the remote registry. Incompatible with -l.
     -P              Override the default platform list. Incompatible with -l.
                     (default: linux/amd64,linux/arm/v7,linux/arm64)
-    -v              Set seafile server version to build (default: 8.0.6)
+    -v              Set seafile server version to build (default: 8.0.7)
     -h              Set python requirement file for seahub (default: official requirement file)
     -d              Set python requirement file for seafdav (default: official requirement file)
     -r              Registry to which upload the image (default: Docker Hub)
@@ -48,7 +48,7 @@ $ docker run --rm -d --name seafile \
              -e PUID=1001 -e PGID=1001 \
              -e TZ=Europe/Zurich
              -e SERVER_IP=cloud.my.domain \
-             -e ENABLE_TLS=1 \
+             -e USE_HTTPS=1 \
              -e SEAFILE_ADMIN_EMAIL=me@my.domain \
              -e SEAFILE_ADMIN_PASSWORD=secret \
              -e MYSQL_HOST=db.hostname \
@@ -91,14 +91,14 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
 |`FILESERVER_PORT`|*(Optional)* Port used by the file server service inside the container. *Default: 8082*|
-|`ENABLE_TLS`|*(Optional)* (0: Do not use TLS\|1: Use TLS) Enable https usage. *Default: 0*|
+|`USE_HTTPS`|*(Optional)* (0: Unsecured access is used\|1: Secured access is used) Write configuration for https usage. **This has nothing to do with TLS certificates, it only writes some configuration files as you can see [here](https://manual.seafile.com/deploy/https_with_nginx/#modifying-ccnetconf)**. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
 
 
 #### MySQL/MariaDB specific parameters
 
-I you want a MySQ/MariaDB deployment, you'll have to/can deal with some additional parameters.
+I you want a MySQL/MariaDB deployment, you'll have to/can deal with some additional parameters.
 
 >Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
 
