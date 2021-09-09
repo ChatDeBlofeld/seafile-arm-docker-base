@@ -18,17 +18,16 @@ function detectAutoMode() {
     fi
 }
 
-if [ "$SEAFILE_DIR" ] 
+if [[ "$SEAFILE_DIR" || "$SEAHUB_PORT" || "$FILESERVER_PORT" ]] 
 then
-    print "Unsupported parameter: SEAFILE_DIR"
+    print "Unsupported parameters"
+    print "Remove references to SEAFILE_DIR, SEAHUB_PORT and FILESERVER_PORT and try again"
     exit 1
 fi
 
 print "Setting default environment"
 if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
 if [ "$PORT" ]; then export SERVER_IP=${SERVER_IP}:${PORT}; fi
-if [ ! "$SEAHUB_PORT" ]; then export SEAHUB_PORT=8000; fi
-if [ ! "$FILESERVER_PORT" ]; then export FILESERVER_PORT=8082; fi
 if [ "$USE_HTTPS" == "1" ]; then export HTTPS_SUFFIX="s"; fi
 if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
 if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
@@ -38,6 +37,8 @@ if [ ! "$USE_EXISTING_DB" ]; then export USE_EXISTING_DB=0; fi
 if [ ! "$CCNET_DB" ]; then export CCNET_DB=ccnet_db; fi
 if [ ! "$SEAFILE_DB" ]; then export SEAFILE_DB=seafile_db; fi
 if [ ! "$SEAHUB_DB" ]; then export SEAHUB_DB=seahub_db; fi
+export SEAHUB_PORT=8000
+export FILESERVER_PORT=8082
 
 if [ "$SQLITE" != "1" ]
 then 

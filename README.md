@@ -69,7 +69,7 @@ This contains all configuration files and data.
 
 ### Accessibility
 
-In bridge mode (default), some ports have to be published for the host to reach the services inside the container. By default, seahub runs on port `8000` and the file server on port `8082`.
+In bridge mode (default), some ports have to be published for the host to reach the services inside the container. Seahub runs on port `8000` and the file server on port `8082`.
 
 ```
 -p 8000:8000 -p 8082:8082
@@ -89,8 +89,6 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`SQLITE`| *(Optional)* (0: MySQL/MariaDB setup\|1: SQLite setup) Set the setup script to use. *Default: 0* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
-|`SEAHUB_PORT`|*(Optional)* Port used by the Seahub service inside the container. *Default: 8000*|
-|`FILESERVER_PORT`|*(Optional)* Port used by the file server service inside the container. *Default: 8082*|
 |`USE_HTTPS`|*(Optional)* (0: Unsecured access is used\|1: Secured access is used) Write configuration for https usage. **This has nothing to do with TLS certificates, it only writes some configuration files as you can see [here](https://manual.seafile.com/deploy/https_with_nginx/#modifying-ccnetconf)**. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
