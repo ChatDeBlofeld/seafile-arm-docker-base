@@ -1,6 +1,6 @@
 ARG VERSION
 
-FROM debian:buster AS builder
+FROM debian:bullseye AS builder
 
 ARG VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
@@ -53,7 +53,7 @@ RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
 COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/setup-seafile-mysql.py
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 ARG VERSION
 

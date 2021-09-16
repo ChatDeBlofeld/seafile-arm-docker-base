@@ -37,8 +37,8 @@ done
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR
 
-# Register qemu handlers
-docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+# Register/update emulators
+docker run --rm --privileged tonistiigi/binfmt --install all >/dev/null
 
 # create multiarch builder if needed
 BUILDER=multiarch_builder
