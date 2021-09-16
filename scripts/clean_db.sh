@@ -9,12 +9,15 @@ if [ ! "$SEAHUB_DB" ]; then SEAHUB_DB="seahub_db"; fi
 python3 - <<PYTHON_SCRIPT
 import MySQLdb
 
-db = MySQLdb.connect(host="${MYSQL_HOST}", port=${MYSQL_PORT}, user="root", password="${MYSQL_ROOT_PASSWD}")
-cursor = db.cursor()
+try:
+    db = MySQLdb.connect(host="${MYSQL_HOST}", port=${MYSQL_PORT}, user="root", password="${MYSQL_ROOT_PASSWD}")
+    cursor = db.cursor()
 
-cursor.execute("DROP DATABASE ${CCNET_DB}")
-cursor.execute("DROP DATABASE ${SEAFILE_DB}")
-cursor.execute("DROP DATABASE ${SEAHUB_DB}")
+    cursor.execute("DROP DATABASE ${CCNET_DB}")
+    cursor.execute("DROP DATABASE ${SEAFILE_DB}")
+    cursor.execute("DROP DATABASE ${SEAHUB_DB}")
+except MySQLdb.OperationalError:
+    pass
 
 db.close()
 PYTHON_SCRIPT
