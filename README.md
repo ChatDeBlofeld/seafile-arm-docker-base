@@ -98,8 +98,6 @@ All these parameters have to be passed as environment variables. Except for `PUI
 
 I you want a MySQL/MariaDB deployment, you'll have to/can deal with some additional parameters.
 
->Warning: connect to a MySQL 8 db could not work as expected, see [this issue](https://github.com/ChatDeBlofeld/seafile-arm-docker-base/issues/1) for more information.
-
 | Parameter | Description |
 |:-|:-|
 |`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks is probably the key here. *Default: 127.0.0.1*|
