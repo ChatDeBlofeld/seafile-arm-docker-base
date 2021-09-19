@@ -140,7 +140,7 @@ then
     if [ "$SQLITE" ]
     then 
         ln -s /shared/sqlite ./ccnet
-        ln -s ../sqlite/seafile.db /shared/seafile-data/
+        ln -s /shared/sqlite/seafile.db /shared/seafile-data/
         ln -s /shared/sqlite/seahub.db .
     fi
 fi
