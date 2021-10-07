@@ -80,14 +80,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 WORKDIR /opt/seafile
 
-RUN useradd -ms /bin/bash -G sudo seafile \
-    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
-    && chown -R seafile:seafile /opt/seafile
-
-COPY --from=builder --chown=seafile:seafile /seafile /opt/seafile
-
+COPY --from=builder /seafile /opt/seafile
 COPY docker_entrypoint.sh /
-COPY --chown=seafile:seafile scripts /home/seafile
+COPY scripts /home/seafile
+
+# Rights management
+RUN groupadd runtime \
+    && useradd -ms /bin/bash -G sudo,runtime seafile \
+    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+    && chown -R seafile:runtime /opt/seafile /home/seafile \
+    && chmod -R g+w /opt/seafile /home/seafile
 
 # Add version in container context
 ENV SEAFILE_SERVER_VERSION $VERSION
