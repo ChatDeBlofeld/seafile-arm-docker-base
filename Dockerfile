@@ -53,6 +53,8 @@ RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
 
 COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/setup-seafile-mysql.py
 
+RUN chmod -R g+w .
+
 FROM debian:bullseye-slim
 
 ARG VERSION
@@ -80,16 +82,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 WORKDIR /opt/seafile
 
-COPY --from=builder /seafile /opt/seafile
-COPY docker_entrypoint.sh /
-COPY scripts /home/seafile
-
 # Rights management
-RUN groupadd runtime \
+RUN groupadd -g 999 runtime \
     && useradd -ms /bin/bash -G sudo,runtime seafile \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
-    && chown -R seafile:runtime /opt/seafile /home/seafile \
-    && chmod -R g+w /opt/seafile /home/seafile
+    && chown seafile:runtime . \
+    && chmod g+w .
+
+COPY --from=builder --chown=seafile:runtime /seafile /opt/seafile
+COPY docker_entrypoint.sh /
+COPY --chown=seafile:seafile scripts /home/seafile
 
 # Add version in container context
 ENV SEAFILE_SERVER_VERSION $VERSION
