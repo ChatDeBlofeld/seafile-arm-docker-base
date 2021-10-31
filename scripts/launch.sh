@@ -43,6 +43,14 @@ then
     fi
 fi
 
+SEAFILE_CONFIG="$(awk '/\[/{prefix=$0; next} $1{print prefix $0}' /shared/conf/seafile.conf)"
+if [ "$(echo "$SEAFILE_CONFIG" | grep -Fi [database])" ]
+then
+    export MYSQL_HOSTNAME=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]host | cut -d'=' -f2 | xargs)
+    export MYSQL_PORT=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]port | cut -d'=' -f2 | xargs)
+    /home/seafile/wait_for_db.sh
+fi
+
 print "Launching seafile"
 ./seafile-server-latest/seafile.sh start
 ./seafile-server-latest/seahub.sh start
