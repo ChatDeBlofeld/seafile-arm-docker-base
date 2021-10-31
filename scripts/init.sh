@@ -108,6 +108,7 @@ ln -s ../seahub-data/custom /shared/media
 print "Exposing configuration and data"
 # Use cp and not move for multiple volume mapping compatibility
 cp -r ./conf /shared/ && rm -rf ./conf
+echo $REVISION > /shared/conf/revision
 cp -r ./seafile-data /shared/ && rm -rf ./seafile-data
 cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
 mkdir /shared/seahub-data/custom

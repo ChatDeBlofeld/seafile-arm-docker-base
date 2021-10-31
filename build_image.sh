@@ -1,19 +1,11 @@
 #!/bin/bash
 
-DOCKERFILE_DIR="."
-MULTIARCH_PLATFORMS="linux/amd64,linux/arm/v7,linux/arm64"
+echo "Loading environment..."
+set -a
+[ -f .env ] && . .env
+set +a
 
-VERSION="8.0.7"
-PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
-PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
-
-REGISTRY=""
-REPOSITORY="franchetti"
-IMAGE="seafile-arm"
-TAGS=""
-
-OUTPUT=""
-while getopts r:u:i:t:v:h:d:l:p flag
+while getopts r:u:i:t:v:h:d:l:P:p flag
 do
     case "${flag}" in
         r) REGISTRY="$OPTARG/";;
@@ -23,9 +15,9 @@ do
         p) OUTPUT="--push";;
         P) MULTIARCH_PLATFORMS=$OPTARG;;
         l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
-        v) VERSION=$OPTARG
-           PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${VERSION}-server/requirements.txt"
-           PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${VERSION}-server/requirements.txt"
+        v) SEAFILE_SERVER_VERSION=$OPTARG
+           PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
+           PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
            ;;
         h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
@@ -60,7 +52,8 @@ fi
 
 # Build image
 docker buildx build \
-    --build-arg VERSION=$VERSION \
+    --build-arg REVISION=$REVISION \
+    --build-arg SEAFILE_SERVER_VERSION=$SEAFILE_SERVER_VERSION \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB=$PYTHON_REQUIREMENTS_URL_SEAHUB \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV=$PYTHON_REQUIREMENTS_URL_SEAFDAV \
     $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"

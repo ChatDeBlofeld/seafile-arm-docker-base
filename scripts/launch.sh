@@ -26,6 +26,12 @@ then
     ln -s ../seahub-data/custom /shared/media
 fi
 
+if [[ ! -f "/shared/conf/revision" || $(cat /shared/conf/revision) -lt $REVISION ]]
+then
+    print "New image revision, updating..."
+    /home/seafile/update.sh
+fi
+
 if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
