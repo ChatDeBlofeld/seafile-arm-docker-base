@@ -4,6 +4,26 @@ function print() {
     echo "$(date -Iseconds) [Launch] $@"
 }
 
+function readCurrentRevision() {
+    CURRENT_REVISION=0
+    if [[ -f "/shared/conf/revision" ]
+    then
+        CURRENT_REVISION=$(cat /shared/conf/revision)
+    fi
+}
+
+function readSGBD() {
+    SEAFILE_CONFIG="$(awk '/\[/{prefix=$0; next} $1{print prefix $0}' /shared/conf/seafile.conf)"
+    if [ "$(echo "$SEAFILE_CONFIG" | grep -Fi [database])" ]
+    then
+        export SQLITE=""
+        export MYSQL_HOSTNAME=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]host | cut -d'=' -f2 | xargs)
+        export MYSQL_PORT=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]port | cut -d'=' -f2 | xargs)
+    else
+        export SQLITE=1
+    fi
+}
+
 cd /opt/seafile
 
 if [ ! -d "./seafile-server-latest" ]
@@ -26,10 +46,13 @@ then
     ln -s ../seahub-data/custom /shared/media
 fi
 
-if [[ ! -f "/shared/conf/revision" || $(cat /shared/conf/revision) -lt $REVISION ]]
+
+readCurrentRevision
+readSGBD
+if [[ $CURRENT_REVISION -lt $REVISION ]]
 then
     print "New image revision, updating..."
-    /home/seafile/update.sh
+    /home/seafile/update.sh $CURRENT_REVISION
 fi
 
 if [ ! -d "./conf" ]
@@ -49,12 +72,9 @@ then
     fi
 fi
 
-SEAFILE_CONFIG="$(awk '/\[/{prefix=$0; next} $1{print prefix $0}' /shared/conf/seafile.conf)"
-if [ "$(echo "$SEAFILE_CONFIG" | grep -Fi [database])" ]
+if [ ! "$SQLITE" ]
 then
     print "Waiting for db"
-    export MYSQL_HOSTNAME=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]host | cut -d'=' -f2 | xargs)
-    export MYSQL_PORT=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]port | cut -d'=' -f2 | xargs)
     /home/seafile/wait_for_db.sh
 fi
 
