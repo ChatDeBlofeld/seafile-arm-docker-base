@@ -82,5 +82,11 @@ fi
 print "Running launch script"
 su seafile -pc "/home/seafile/launch.sh"
 
+if [ $? != 0 ]
+then
+    print "Launch failed"
+    exit 1
+fi
+
 print "Waiting for termination"
 tail -f /dev/null & wait

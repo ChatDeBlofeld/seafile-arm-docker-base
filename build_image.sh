@@ -5,9 +5,10 @@ set -a
 [ -f .env ] && . .env
 set +a
 
-while getopts r:u:i:t:v:h:d:l:P:p flag
+while getopts R:r:u:i:t:v:h:d:l:P:p flag
 do
     case "${flag}" in
+        R) REVISION=$OPTARG;;
         r) REGISTRY="$OPTARG/";;
         u) REPOSITORY=$OPTARG;;
         i) IMAGE=$OPTARG;;

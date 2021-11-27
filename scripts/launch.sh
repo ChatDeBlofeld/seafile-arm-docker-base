@@ -6,7 +6,7 @@ function print() {
 
 function readCurrentRevision() {
     CURRENT_REVISION=0
-    if [[ -f "/shared/conf/revision" ]
+    if [ -f "/shared/conf/revision" ]
     then
         CURRENT_REVISION=$(cat /shared/conf/revision)
     fi
@@ -46,15 +46,6 @@ then
     ln -s ../seahub-data/custom /shared/media
 fi
 
-
-readCurrentRevision
-readSGBD
-if [[ $CURRENT_REVISION -lt $REVISION ]]
-then
-    print "New image revision, updating..."
-    /home/seafile/update.sh $CURRENT_REVISION
-fi
-
 if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
@@ -72,10 +63,19 @@ then
     fi
 fi
 
+readSGBD
 if [ ! "$SQLITE" ]
 then
     print "Waiting for db"
     /home/seafile/wait_for_db.sh
+fi
+
+readCurrentRevision
+if [[ $CURRENT_REVISION -lt $REVISION ]]
+then
+    print "New image revision, updating..."
+    /home/seafile/update.sh $CURRENT_REVISION
+    if [ $? != 0 ]; then exit 1; fi
 fi
 
 print "Launching seafile"
