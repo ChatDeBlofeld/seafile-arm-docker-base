@@ -9,11 +9,11 @@ ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 RUN apt-get update -y && apt-get install -y \
     wget \
     sudo \
-    libmemcached-dev
+    libmemcached-dev \
+    golang
 
 # Retrieve seafile build script
-# RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
-RUN wget https://raw.githubusercontent.com/ChatDeBlofeld/seafile-rpi/dev/build3.sh
+RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
 RUN chmod u+x build3.sh
 
 # Build each component separately for better cache and easy debug in case of failure
@@ -37,9 +37,15 @@ RUN ./build3.sh -6 -v $SEAFILE_SERVER_VERSION
 # Build Seafile server
 RUN ./build3.sh -7 -v $SEAFILE_SERVER_VERSION
 
+# Build go fileserver
+# This should be temporary until the official build process is updated
+RUN cd /haiwen-build/seafile-server/fileserver && go build
+
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
-RUN mkdir seafile && mv seafile-server-$SEAFILE_SERVER_VERSION seafile
+RUN mkdir seafile \
+    && mv seafile-server-$SEAFILE_SERVER_VERSION seafile \
+    && mv /haiwen-build/seafile-server/fileserver/fileserver seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/bin/
 
 WORKDIR /seafile
 
@@ -58,9 +64,6 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 RUN chmod -R g+w .
 
 FROM debian:bullseye-slim
-
-ARG SEAFILE_SERVER_VERSION
-ARG REVISION
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
@@ -95,6 +98,9 @@ RUN groupadd -g 999 runtime \
 COPY --from=builder --chown=seafile:runtime /seafile /opt/seafile
 COPY docker_entrypoint.sh /
 COPY --chown=seafile:seafile scripts /home/seafile
+
+ARG SEAFILE_SERVER_VERSION
+ARG REVISION
 
 # Add Seafile version in container context
 ENV SEAFILE_SERVER_VERSION $SEAFILE_SERVER_VERSION
