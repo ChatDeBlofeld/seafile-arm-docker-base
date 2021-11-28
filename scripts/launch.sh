@@ -17,7 +17,7 @@ function readSGBD() {
     if [ "$(echo "$SEAFILE_CONFIG" | grep -Fi [database])" ]
     then
         export SQLITE=""
-        export MYSQL_HOSTNAME=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]host | cut -d'=' -f2 | xargs)
+        export MYSQL_HOST=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]host | cut -d'=' -f2 | xargs)
         export MYSQL_PORT=$(echo "$SEAFILE_CONFIG" | grep -Fi [database]port | cut -d'=' -f2 | xargs)
     else
         export SQLITE=1
