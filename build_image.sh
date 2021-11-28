@@ -5,10 +5,11 @@ set -a
 [ -f .env ] && . .env
 set +a
 
-while getopts R:r:u:i:t:v:h:d:l:P:p flag
+while getopts R:D:r:u:i:t:v:h:d:l:P:p flag
 do
     case "${flag}" in
         R) REVISION=$OPTARG;;
+        D) DOCKERFILE_DIR=$OPTARG;;
         r) REGISTRY="$OPTARG/";;
         u) REPOSITORY=$OPTARG;;
         i) IMAGE=$OPTARG;;
@@ -26,6 +27,8 @@ do
         \?) exit;; 
     esac
 done
+
+if DOCKERFILE_DIR=""; then DOCKERFILE_DIR="."; fi
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR
