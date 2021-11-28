@@ -1,5 +1,7 @@
 # Seafile Docker image for ARM
 
+> **NOTE : Since Seafile 9, an [official Docker image](https://forum.seafile.com/t/seafile-community-edition-9-0-1-is-ready-arm64-is-supported-now/15480) for arm64 is available. Nevertheless, this repository will continue to be updated.**
+
 A [Docker image](https://hub.docker.com/r/franchetti/seafile-arm) of the [Seafile](https://www.seafile.com/en/home/)  data synchronization system targeting ARMv7 and ARM64 platforms, like Raspberry Pi or Pine 64 boards. 
 
 This repository is part of [a bigger project](https://github.com/ChatDeBlofeld/seafile-arm-docker) intended for bringing a full working Seafile environment (Seafile server, database server, web server with TLS support) in no time.
@@ -10,25 +12,30 @@ The build step uses the great [Seafile for Raspberry PI](https://github.com/haiw
 
 > Warning: you'll probably have to deal with the -h/-d options to get something working. [This repository](https://github.com/jobenvil/rpi-build-seafile) can help.
 
+Copy the `.env.example` file to `.env`. Then you can either update the dotenv for your needs or use the command line arguments.
+
 ```
 build_image.sh [OPTIONS]
 
+Command line arguments take precedence over settings defined in the .env file
+
 Options:
-    -t              Add a tag. Can be used several times.
+    -t              Add a tag. Can be used several times
     -l <platform>   Load to the local images. One <platform> at time only.
                     <platform> working choices can be: 
                         arm/v7 
                         arm64 
                         amd64
     -p              Push the image(s) to the remote registry. Incompatible with -l.
+    -R              Image revision
+    -D              Dockerfile directory (default: current directory)
     -P              Override the default platform list. Incompatible with -l.
-                    (default: linux/amd64,linux/arm/v7,linux/arm64)
-    -v              Set seafile server version to build (default: 8.0.7)
-    -h              Set python requirement file for seahub (default: official requirement file)
-    -d              Set python requirement file for seafdav (default: official requirement file)
-    -r              Registry to which upload the image (default: Docker Hub)
-    -u              Repository to which upload the image (default: my Docker Hub username)
-    -i              Image name (default: seafile-arm)
+    -v              Set seafile server version to build
+    -h              Set python requirement file for seahub
+    -d              Set python requirement file for seafdav
+    -r              Registry to which upload the image
+    -u              Repository to which upload the image
+    -i              Image name
 ```
 
 Example:

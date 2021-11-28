@@ -1,15 +1,16 @@
-ARG VERSION
+ARG SEAFILE_SERVER_VERSION
 
 FROM debian:bullseye AS builder
 
-ARG VERSION
+ARG SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
 ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 RUN apt-get update -y && apt-get install -y \
     wget \
     sudo \
-    libmemcached-dev
+    libmemcached-dev \
+    golang
 
 # Retrieve seafile build script
 RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
@@ -18,46 +19,51 @@ RUN chmod u+x build3.sh
 # Build each component separately for better cache and easy debug in case of failure
 
 # Install dependencies and thirdparty requirements
-RUN ./build3.sh -D -v $VERSION \
+RUN ./build3.sh -D -v $SEAFILE_SERVER_VERSION \
     -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
     -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
 # Build libevhtp
-RUN ./build3.sh -1 -v $VERSION
+RUN ./build3.sh -1 -v $SEAFILE_SERVER_VERSION
 # Build libsearpc
-RUN ./build3.sh -2 -v $VERSION
+RUN ./build3.sh -2 -v $SEAFILE_SERVER_VERSION
 # Build seafile
-RUN ./build3.sh -3 -v $VERSION
+RUN ./build3.sh -3 -v $SEAFILE_SERVER_VERSION
 # Build seahub
-RUN ./build3.sh -4 -v $VERSION
+RUN ./build3.sh -4 -v $SEAFILE_SERVER_VERSION
 # Build seafobj
-RUN ./build3.sh -5 -v $VERSION
+RUN ./build3.sh -5 -v $SEAFILE_SERVER_VERSION
 # Build seafdav
-RUN ./build3.sh -6 -v $VERSION
+RUN ./build3.sh -6 -v $SEAFILE_SERVER_VERSION
 # Build Seafile server
-RUN ./build3.sh -7 -v $VERSION
+RUN ./build3.sh -7 -v $SEAFILE_SERVER_VERSION
+
+# Build go fileserver
+# This should be temporary until the official build process is updated
+RUN cd /haiwen-build/seafile-server/fileserver && go build
 
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
-RUN mkdir seafile && mv seafile-server-$VERSION seafile
+RUN mkdir seafile \
+    && mv seafile-server-$SEAFILE_SERVER_VERSION seafile \
+    && mv /haiwen-build/seafile-server/fileserver/fileserver seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/bin/
 
 WORKDIR /seafile
 
 # Additional dependencies
-RUN python3 -m pip install --target seafile-server-$VERSION/seahub/thirdpart --upgrade \
+RUN python3 -m pip install --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
     # Memcached
     pylibmc \
     django-pylibmc
 
 # Prepare media folder to be exposed
-RUN mv seafile-server-$VERSION/seahub/media . && echo $VERSION > ./media/version
+RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . && echo $SEAFILE_SERVER_VERSION > ./media/version
 
-COPY custom/setup-seafile-mysql.py seafile-server-$VERSION/setup-seafile-mysql.py
+COPY custom/setup-seafile-mysql.py seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.py
+COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/db_update_helper.py
 
 RUN chmod -R g+w .
 
 FROM debian:bullseye-slim
-
-ARG VERSION
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
@@ -93,7 +99,13 @@ COPY --from=builder --chown=seafile:runtime /seafile /opt/seafile
 COPY docker_entrypoint.sh /
 COPY --chown=seafile:seafile scripts /home/seafile
 
-# Add version in container context
-ENV SEAFILE_SERVER_VERSION $VERSION
+ARG SEAFILE_SERVER_VERSION
+ARG REVISION
+
+# Add Seafile version in container context
+ENV SEAFILE_SERVER_VERSION $SEAFILE_SERVER_VERSION
+
+# Add image revision in container context
+ENV REVISION $REVISION
 
 CMD ["/docker_entrypoint.sh"]

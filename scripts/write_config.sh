@@ -6,11 +6,6 @@ GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
 
 function writeCcnetConfig() {
-    sed -ni '/General/!p' $CCNET_CONFIG_FILE
-    sed -ni '/SERVICE_URL/!p' $CCNET_CONFIG_FILE
-    echo "[General]" >> $CCNET_CONFIG_FILE
-    echo "SERVICE_URL = http${HTTPS_SUFFIX}://${SERVER_IP}" >> $CCNET_CONFIG_FILE
-
     if [ "$HTTPS_SUFFIX" ]
     then
         echo "USE_X_FORWARDED_HOST = True" >> $CCNET_CONFIG_FILE
@@ -24,6 +19,7 @@ function writeGunicornSettings() {
 }
 
 function writeSeahubConfiguration() {
+    echo "SERVICE_URL = \"http${HTTPS_SUFFIX}://${SERVER_IP}\"" >> $SEAHUB_CONFIG_FILE
     echo "FILE_SERVER_ROOT = \"http${HTTPS_SUFFIX}://${SERVER_IP}/seafhttp\"" >> $SEAHUB_CONFIG_FILE
 }
 
