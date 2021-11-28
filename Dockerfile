@@ -56,7 +56,7 @@ RUN python3 -m pip install --target seafile-server-$SEAFILE_SERVER_VERSION/seahu
     django-pylibmc
 
 # Prepare media folder to be exposed
-RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . && echo $SEAFILE_SERVER_VERSION ./media/version
+RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . && echo $SEAFILE_SERVER_VERSION > ./media/version
 
 COPY custom/setup-seafile-mysql.py seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.py
 COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/db_update_helper.py
