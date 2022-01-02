@@ -47,12 +47,13 @@ fi
 docker buildx use $BUILDER
 
 # Fix docker multiarch building when host local IP changes
-BUILDER_CONTAINER="$(docker ps -qf name=$BUILDER)"
-if [ ! -z "${BUILDER_CONTAINER}" ]; then
-  echo 'Restarting builder container..'
-  docker restart $(docker ps -qf name=$BUILDER)
-  sleep 2
-fi
+# FIXME: restarting causes "error: dial unix /run/buildkit/buildkitd.sock: connect: no such file or directory"
+# BUILDER_CONTAINER="$(docker ps -qf name=$BUILDER)"
+# if [ ! -z "${BUILDER_CONTAINER}" ]; then
+#   echo 'Restarting builder container..'
+#   docker restart $(docker ps -qf name=$BUILDER)
+#   sleep 2
+# fi
 
 # Build image
 docker buildx build \

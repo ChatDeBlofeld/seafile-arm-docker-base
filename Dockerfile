@@ -13,33 +13,31 @@ RUN apt-get update -y && apt-get install -y \
     golang
 
 # Retrieve seafile build script
-RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build3.sh
-RUN chmod u+x build3.sh
+RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
+RUN chmod u+x build.sh
 
 # Build each component separately for better cache and easy debug in case of failure
 
 # Install dependencies and thirdparty requirements
-RUN ./build3.sh -D -v $SEAFILE_SERVER_VERSION \
+RUN ./build.sh -D -v $SEAFILE_SERVER_VERSION \
     -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
     -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
 # Build libevhtp
-RUN ./build3.sh -1 -v $SEAFILE_SERVER_VERSION
+RUN ./build.sh -1 -v $SEAFILE_SERVER_VERSION
 # Build libsearpc
-RUN ./build3.sh -2 -v $SEAFILE_SERVER_VERSION
-# Build seafile
-RUN ./build3.sh -3 -v $SEAFILE_SERVER_VERSION
+RUN ./build.sh -2 -v $SEAFILE_SERVER_VERSION
+# Build seafile (c_fileserver)
+RUN ./build.sh -3 -v $SEAFILE_SERVER_VERSION
+# Build seafile (go_fileserver)
+RUN ./build.sh -4 -v $SEAFILE_SERVER_VERSION
 # Build seahub
-RUN ./build3.sh -4 -v $SEAFILE_SERVER_VERSION
+RUN ./build.sh -5 -v $SEAFILE_SERVER_VERSION
 # Build seafobj
-RUN ./build3.sh -5 -v $SEAFILE_SERVER_VERSION
+RUN ./build.sh -6 -v $SEAFILE_SERVER_VERSION
 # Build seafdav
-RUN ./build3.sh -6 -v $SEAFILE_SERVER_VERSION
+RUN ./build.sh -7 -v $SEAFILE_SERVER_VERSION
 # Build Seafile server
-RUN ./build3.sh -7 -v $SEAFILE_SERVER_VERSION
-
-# Build go fileserver
-# This should be temporary until the official build process is updated
-RUN cd /haiwen-build/seafile-server/fileserver && go build
+RUN ./build.sh -8 -v $SEAFILE_SERVER_VERSION
 
 # Extract package
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
