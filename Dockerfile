@@ -47,6 +47,10 @@ RUN mkdir seafile \
 
 WORKDIR /seafile
 
+# Copy SQL scripts
+# This should be temporary until the official build process is updated (or not)
+RUN cp -r /haiwen-build/seafile-server/scripts/sql seafile-server-$SEAFILE_SERVER_VERSION
+
 # Additional dependencies
 RUN python3 -m pip install --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
     # Memcached
