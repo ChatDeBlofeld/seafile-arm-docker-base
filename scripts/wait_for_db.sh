@@ -15,5 +15,7 @@ while True:
     except MySQLdb.OperationalError as err:
         if err.args[0] == ${EXPECTED_ERROR_CODE}:
             break
+        else:
+            print(err)
     sleep(1)
 PYTHON_SCRIPT
