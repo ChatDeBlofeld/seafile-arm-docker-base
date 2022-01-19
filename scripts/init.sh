@@ -26,19 +26,27 @@ then
 fi
 
 print "Setting default environment"
-if [ ! "$SERVER_IP" ]; then export SERVER_IP=127.0.0.1; fi
-if [ "$PORT" ]; then export SERVER_IP=${SERVER_IP}:${PORT}; fi
-if [ "$USE_HTTPS" == "1" ]; then export HTTPS_SUFFIX="s"; fi
-if [ ! "$MYSQL_HOST" ]; then export MYSQL_HOST=127.0.0.1; fi
-if [ ! "$MYSQL_PORT" ]; then export MYSQL_PORT=3306; fi
-if [ ! "$MYSQL_USER" ]; then export MYSQL_USER=seafile; fi
-if [ ! "$MYSQL_USER_HOST" ]; then export MYSQL_USER_HOST="%"; fi
-if [ ! "$USE_EXISTING_DB" ]; then export USE_EXISTING_DB=0; fi
-if [ ! "$CCNET_DB" ]; then export CCNET_DB=ccnet_db; fi
-if [ ! "$SEAFILE_DB" ]; then export SEAFILE_DB=seafile_db; fi
-if [ ! "$SEAHUB_DB" ]; then export SEAHUB_DB=seahub_db; fi
+export SERVER_IP=${SERVER_IP:=127.0.0.1}
+export MYSQL_HOST=${MYSQL_HOST:=127.0.0.1}
+export MYSQL_PORT=${MYSQL_PORT:=3306}
+export MYSQL_USER=${MYSQL_USER:=seafile}
+export MYSQL_USER_HOST=${MYSQL_USER_HOST:="%"}
+export USE_EXISTING_DB=${USE_EXISTING_DB:=0}
+export CCNET_DB=${CCNET_DB:=ccnet_db}
+export SEAFILE_DB=${SEAFILE_DB:=seafile_db}
+export SEAHUB_DB=${SEAHUB_DB:=seahub_db}
 export SEAHUB_PORT=8000
 export FILESERVER_PORT=8082
+
+if [ "$PORT" ]
+then
+    export SERVER_IP=${SERVER_IP}:${PORT}
+fi
+
+if [ "$USE_HTTPS" == "1" ]
+then
+  export HTTPS_SUFFIX="s"
+fi
 
 if [ "$SQLITE" != "1" ]
 then 

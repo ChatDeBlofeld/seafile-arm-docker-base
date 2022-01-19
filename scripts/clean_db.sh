@@ -2,9 +2,9 @@
 
 export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${SEAFILE_SERVER_VERSION}/seahub/thirdpart
 
-if [ ! "$CCNET_DB" ]; then CCNET_DB="ccnet_db"; fi
-if [ ! "$SEAFILE_DB" ]; then SEAFILE_DB="seafile_db"; fi
-if [ ! "$SEAHUB_DB" ]; then SEAHUB_DB="seahub_db"; fi
+CCNET_DB=${CCNET_DB:=ccnet_db}
+SEAFILE_DB=${SEAFILE_DB:=seafile_db}
+SEAHUB_DB=${SEAHUB_DB:=seahub_db}
 
 python3 - <<PYTHON_SCRIPT
 import MySQLdb
