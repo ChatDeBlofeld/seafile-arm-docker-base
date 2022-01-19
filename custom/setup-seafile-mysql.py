@@ -3,19 +3,22 @@
 '''
 This script would guide the seafile admin to setup seafile with MySQL
 
-This is a slighty modified version of the official one for using MySQLdb
-instead of pymysql to reduce dependencies and improve consistency.
+This is a slighty modified version of the official one by Haiwen for using 
+MySQLdb instead of pymysql to reduce dependencies and improve consistency.
 '''
 import argparse
 import sys
 import os
+import time
 import re
 import shutil
 import glob
 import subprocess
 import hashlib
 import getpass
+import uuid
 import warnings
+import socket
 from configparser import ConfigParser
 
 import MySQLdb
@@ -306,6 +309,7 @@ class EnvManager(object):
         self.central_pids_dir = os.path.join(self.top_dir, 'pids')
         self.central_logs_dir = os.path.join(self.top_dir, 'logs')
         Utils.must_mkdir(self.central_config_dir)
+        self.is_pro = os.path.exists(os.path.join(self.install_path, 'pro'))
 
     def check_pre_condiction(self):
         def error_if_not_exists(path):
@@ -329,6 +333,7 @@ class EnvManager(object):
         env = dict(os.environ)
         env['CCNET_CONF_DIR'] = ccnet_config.ccnet_dir
         env['SEAFILE_CONF_DIR'] = seafile_config.seafile_dir
+        env['SEAFES_DIR'] = os.path.join(self.install_path, 'pro', 'python', 'seafes')
         self.setup_python_path(env)
         return env
 
@@ -344,8 +349,8 @@ class EnvManager(object):
 
             os.path.join(install_path, 'seahub', 'thirdpart'),
 
-            os.path.join(install_path, 'seafile/lib/python3.6/site-packages'),
-            os.path.join(install_path, 'seafile/lib64/python3.6/site-packages'),
+            os.path.join(install_path, 'seafile/lib/python3/site-packages'),
+            os.path.join(install_path, 'seafile/lib64/python3/site-packages'),
         ]
 
         for path in extra_python_path:
@@ -808,7 +813,7 @@ class CcnetConfigurator(AbstractConfigurator):
     def generate(self):
         print('Generating ccnet configuration ...\n')
         with open(self.ccnet_conf, 'w') as fp:
-            fp.write('[General]\nSERVICE_URL = http://%s/\n' % self.ip_or_domain)
+            fp.write('[General]')
 
         self.generate_db_conf()
 
@@ -1079,7 +1084,8 @@ class SeahubConfigurator(AbstractConfigurator):
         'USER': '%(username)s',
         'PASSWORD': '%(password)s',
         'HOST': '%(host)s',
-        'PORT': '%(port)s'
+        'PORT': '%(port)s',
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
 
@@ -1211,12 +1217,36 @@ class SeafDavConfigurator(AbstractConfigurator):
 [WEBDAV]
 enabled = false
 port = 8080
-fastcgi = false
 share_name = /
 '''
 
         with open(self.seafdav_conf, 'w') as fp:
             fp.write(text)
+
+class ProfessionalConfigurator(AbstractConfigurator):
+    '''Seafile Pro related configuration'''
+    def __init__(self):
+        AbstractConfigurator.__init__(self)
+        self.pro_py = os.path.join(env_mgr.install_path, 'pro', 'pro.py')
+        self.pro_data_dir = os.path.join(env_mgr.top_dir, 'pro-data')
+
+    def ask_questions(self):
+        pass
+
+    def generate(self):
+        argv = [
+            Utils.get_python_executable(),
+            self.pro_py,
+            'setup',
+            '--mysql',
+            '--mysql_host=%s' % db_config.mysql_host,
+            '--mysql_port=%s' % db_config.mysql_port,
+            '--mysql_user=%s' % db_config.seafile_mysql_user,
+            '--mysql_password=%s' % db_config.seafile_mysql_password,
+            '--mysql_db=%s' % db_config.seahub_db_name,
+        ]
+        if Utils.run_argv(argv, env=env_mgr.get_seahub_env()) != 0:
+            Utils.error('Failed to generate seafile pro configuration')
 
 class GunicornConfigurator(AbstractConfigurator):
     def __init__(self):
@@ -1351,6 +1381,8 @@ seafdav_config = SeafDavConfigurator()
 gunicorn_config = GunicornConfigurator()
 seahub_config = SeahubConfigurator()
 user_manuals_handler = UserManualHandler()
+if env_mgr.is_pro:
+    pro_config = ProfessionalConfigurator()
 # Would be created after AbstractDBConfigurator.ask_use_existing_db()
 db_config = None
 need_pause = True
@@ -1496,6 +1528,8 @@ def main():
     ccnet_config.ask_questions()
     seafile_config.ask_questions()
     seahub_config.ask_questions()
+    if env_mgr.is_pro:
+        pro_config.ask_questions()
 
     # pylint: disable=redefined-variable-type
     if not db_config:
@@ -1515,6 +1549,8 @@ def main():
     seafdav_config.generate()
     gunicorn_config.generate()
     seahub_config.generate()
+    if env_mgr.is_pro:
+        pro_config.generate()
 
     ccnet_config.do_syncdb()
     seafile_config.do_syncdb()
