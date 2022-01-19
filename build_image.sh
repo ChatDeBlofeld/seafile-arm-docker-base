@@ -1,9 +1,12 @@
 #!/bin/bash
 
-echo "Loading environment..."
-set -a
-[ -f .env ] && . .env
-set +a
+if [ ! "$NO_ENV" ]
+then
+    echo "Loading environment..."
+    set -a
+    [ -f .env ] && . .env
+    set +a
+fi
 
 while getopts R:D:r:u:i:t:v:h:d:l:P:p flag
 do
@@ -23,8 +26,8 @@ do
            ;;
         h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
-        :) exit;;
-        \?) exit;; 
+        :) exit 1;;
+        \?) exit 1;; 
     esac
 done
 
@@ -47,12 +50,12 @@ fi
 docker buildx use $BUILDER
 
 # Fix docker multiarch building when host local IP changes
-BUILDER_CONTAINER="$(docker ps -qf name=$BUILDER)"
-if [ ! -z "${BUILDER_CONTAINER}" ]; then
-  echo 'Restarting builder container..'
-  docker restart $(docker ps -qf name=$BUILDER)
-  sleep 2
-fi
+# BUILDER_CONTAINER="$(docker ps -qf name=$BUILDER)"
+# if [ ! -z "${BUILDER_CONTAINER}" ]; then
+#   echo 'Restarting builder container..'
+#   docker restart $(docker ps -qf name=$BUILDER)
+#   sleep 2
+# fi
 
 # Build image
 docker buildx build \
@@ -61,3 +64,4 @@ docker buildx build \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB=$PYTHON_REQUIREMENTS_URL_SEAHUB \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV=$PYTHON_REQUIREMENTS_URL_SEAFDAV \
     $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
+exit $?

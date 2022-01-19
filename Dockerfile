@@ -1,12 +1,12 @@
 ARG SEAFILE_SERVER_VERSION
 
-FROM debian:bullseye AS builder
+FROM ubuntu:focal AS builder
 
 ARG SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
 ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
-RUN apt-get update -y && apt-get install -y \
+RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     wget \
     sudo \
     libmemcached-dev \
@@ -63,7 +63,7 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 
 RUN chmod -R g+w .
 
-FROM debian:bullseye-slim
+FROM ubuntu:focal
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
@@ -79,7 +79,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-cryptography \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
-    libjpeg62-turbo \
+    # libjpeg62-turbo \
     libopenjp2-7 \
     libtiff5 \
     libxcb1 \
