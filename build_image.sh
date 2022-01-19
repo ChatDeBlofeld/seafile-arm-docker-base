@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 echo "Loading environment..."
 set -a
 [ -f .env ] && . .env
