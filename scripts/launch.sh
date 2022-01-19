@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function print() {
-    echo "$(date -Iseconds) [Launch] $@"
+    echo "$(date -Iseconds) [Launch] $*"
 }
 
 function readCurrentRevision() {
