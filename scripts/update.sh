@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 function print() {
-    echo "$(date -Iseconds) [Update] $@"
+    echo "$(date -Iseconds) [Update] $*"
 }
 
 function update_db() {

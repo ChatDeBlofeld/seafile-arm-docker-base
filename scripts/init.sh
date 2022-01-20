@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 function print() {
-    echo "$(date -Iseconds) [Init] $@"
+    echo "$(date -Iseconds) [Init] $*"
 }
 
 function detectAutoMode() {

@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 function print() {
-    echo "$(date -Iseconds) [Launch] $@"
+    echo "$(date -Iseconds) [Launch] $*"
 }
 
 function readCurrentRevision() {
