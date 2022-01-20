@@ -33,7 +33,7 @@ done
 if DOCKERFILE_DIR=""; then DOCKERFILE_DIR="."; fi
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $ROOT_DIR
+cd "$ROOT_DIR"
 
 # Register/update emulators
 docker run --rm --privileged tonistiigi/binfmt --install all >/dev/null
@@ -59,8 +59,8 @@ docker buildx use $BUILDER
 
 # Build image
 docker buildx build \
-    --build-arg REVISION=$REVISION \
-    --build-arg SEAFILE_SERVER_VERSION=$SEAFILE_SERVER_VERSION \
-    --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB=$PYTHON_REQUIREMENTS_URL_SEAHUB \
-    --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV=$PYTHON_REQUIREMENTS_URL_SEAFDAV \
-    $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
+    --build-arg REVISION="$REVISION" \
+    --build-arg SEAFILE_SERVER_VERSION="$SEAFILE_SERVER_VERSION" \
+    --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB="$PYTHON_REQUIREMENTS_URL_SEAHUB" \
+    --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV="$PYTHON_REQUIREMENTS_URL_SEAFDAV" \
+    $OUTPUT --platform "$MULTIARCH_PLATFORMS" "$TAGS" "$DOCKERFILE_DIR"

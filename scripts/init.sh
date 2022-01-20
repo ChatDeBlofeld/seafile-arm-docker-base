@@ -76,11 +76,11 @@ fi
 
 print "Exposing media folder in the volume"
 cp -r ./media /shared/
-ln -s /shared/media ./seafile-server-$SEAFILE_SERVER_VERSION/seahub
+ln -s /shared/media ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub
 
 print "Running installation script"
 LOGFILE=./install.log
-./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE
+./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh "$AUTO" |& tee $LOGFILE
 
 # Handle db starting twice at init edge case 
 if [[ "$AUTO" && ! "$SQLITE" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
@@ -101,7 +101,7 @@ then
     fi
 
     print "Retrying install"
-    ./seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
+    ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh "$AUTO" | tee $LOGFILE
 fi
 
 if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
@@ -118,7 +118,7 @@ ln -s ../seahub-data/custom /shared/media
 print "Exposing configuration and data"
 # Use cp and not move for multiple volume mapping compatibility
 cp -r ./conf /shared/ && rm -rf ./conf
-echo $REVISION > /shared/conf/revision
+echo "$REVISION" > /shared/conf/revision
 cp -r ./seafile-data /shared/ && rm -rf ./seafile-data
 cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
 mkdir /shared/seahub-data/custom
@@ -138,7 +138,7 @@ fi
 if [ ! -d "./seafile-server-latest" ]
 then
     print "Making symlink to latest version"
-    ln -s seafile-server-$SEAFILE_SERVER_VERSION seafile-server-latest
+    ln -s seafile-server-"$SEAFILE_SERVER_VERSION" seafile-server-latest
 fi
 
 if [ ! -d "./conf" ]
