@@ -12,7 +12,7 @@ function quit() {
     exit
 }
 
-function timezoneAdjustement() {
+function timezoneAdjustment() {
     if [ "$TZ" ]
     then
         if [ ! -f "/usr/share/zoneinfo/$TZ" ]
@@ -58,7 +58,7 @@ function rightsManagement() {
 trap quit SIGTERM
 trap quit SIGINT
 
-timezoneAdjustement
+timezoneAdjustment
 rightsManagement
 
 if [ ! -d "/shared" ]
