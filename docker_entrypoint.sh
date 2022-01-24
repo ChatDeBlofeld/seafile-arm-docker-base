@@ -12,7 +12,7 @@ function quit() {
     exit
 }
 
-function timezoneAdjustement() {
+function timezoneAdjustment() {
     if [ "$TZ" ]
     then
         if [ ! -f "/usr/share/zoneinfo/$TZ" ]
@@ -46,7 +46,7 @@ function rightsManagement() {
     dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
     for dir in "${dirs[@]}"
     do
-        if [[ -d "$dir" && ("$(stat -c %u "$dir")" != $PUID || "$(stat -c %g "$dir")" != $PGID) ]]
+        if [[ -d "$dir" && ("$(stat -c %u "$dir")" != "$PUID" || "$(stat -c %g "$dir")" != "$PGID") ]]
         then
             print "Changing owner for $dir"
             chown -R seafile:seafile "$dir"
@@ -57,9 +57,8 @@ function rightsManagement() {
 # Quit when receiving some signals
 trap quit SIGTERM
 trap quit SIGINT
-trap quit SIGKILL
 
-timezoneAdjustement
+timezoneAdjustment
 rightsManagement
 
 if [ ! -d "/shared" ]
