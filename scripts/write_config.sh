@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 CONFIG_DIR="./conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"

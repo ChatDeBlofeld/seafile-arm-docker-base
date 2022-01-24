@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 function print() {
-    echo "$(date -Iseconds) [Update] $@"
+    echo "$(date -Iseconds) [Update] $*"
 }
 
 function update_db() {
-    if ! python3 ${INSTALLPATH}/upgrade/db_update_helper.py $1
+    if ! python3 "${INSTALLPATH}"/upgrade/db_update_helper.py "$1"
     then
         print "Failed to update database"
         exit 1
@@ -20,14 +22,14 @@ export SEAFILE_CONF_DIR=${TOPDIR}/seafile-data
 export SEAFILE_CENTRAL_CONF_DIR=${TOPDIR}/conf
 export PYTHONPATH=${INSTALLPATH}/seafile/lib/python3.6/site-packages:${INSTALLPATH}/seafile/lib64/python3.6/site-packages:${INSTALLPATH}/seahub:${INSTALLPATH}/seahub/thirdpart:$PYTHONPATH
 
-if [ $CURRENT_REVISION -lt 1 ]; then
+if [ "$CURRENT_REVISION" -lt 1 ]; then
     if [ ! "$SQLITE" ]; then
         print "Update database to Seafile 8 scheme"
         update_db 8.0.0
     fi
 fi
 
-if [ $CURRENT_REVISION -lt 2 ]; then
+if [ "$CURRENT_REVISION" -lt 2 ]; then
     print "Update database to Seafile 9 scheme"
     update_db 9.0.0
 
@@ -38,5 +40,5 @@ if [ $CURRENT_REVISION -lt 2 ]; then
 fi
 
 
-echo $REVISION > "/shared/conf/revision"
+echo "$REVISION" > "/shared/conf/revision"
 print "Done!"

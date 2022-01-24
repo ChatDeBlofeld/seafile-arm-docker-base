@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -Eeuo pipefail
+
 function print() {
-    echo "$(date -Iseconds) [Entrypoint] $@"
+    echo "$(date -Iseconds) [Entrypoint] $*"
 }
 
 function quit() {
@@ -38,16 +40,16 @@ function rightsManagement() {
     fi
 
     print "Adjusting identifiers"
-    groupmod -g $PGID seafile
-    usermod -u $PUID seafile
+    groupmod -g "$PGID" seafile
+    usermod -u "$PUID" seafile
 
     dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
-    for dir in ${dirs[@]}
+    for dir in "${dirs[@]}"
     do
-        if [[ -d "$dir" && ("$(stat -c %u $dir)" != $PUID || "$(stat -c %g $dir)" != $PGID) ]]
+        if [[ -d "$dir" && ("$(stat -c %u "$dir")" != $PUID || "$(stat -c %g "$dir")" != $PGID) ]]
         then
             print "Changing owner for $dir"
-            chown -R seafile:seafile $dir
+            chown -R seafile:seafile "$dir"
         fi
     done
 }
