@@ -76,7 +76,7 @@ readCurrentRevision
 if [[ $CURRENT_REVISION -lt $REVISION ]]
 then
     print "New image revision, updating..."
-    /home/seafile/update.sh $CURRENT_REVISION
+    /home/seafile/update.sh "$CURRENT_REVISION"
     if [ $? != 0 ]; then exit 1; fi
 fi
 
