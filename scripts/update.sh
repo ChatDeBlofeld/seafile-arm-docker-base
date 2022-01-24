@@ -34,7 +34,7 @@ if [ "$CURRENT_REVISION" -lt 2 ]; then
     update_db 9.0.0
 
     print "Move SERVICE_URL to seahub_settings.py"
-    service_url=`awk -F '=' '/\[General\]/{a=1}a==1&&$1~/SERVICE_URL/{print $2;exit}' ${SEAFILE_CENTRAL_CONF_DIR}/ccnet.conf`
+    service_url=$(awk -F '=' '/\[General\]/{a=1}a==1&&$1~/SERVICE_URL/{print $2;exit}' ${SEAFILE_CENTRAL_CONF_DIR}/ccnet.conf)
     service_url=$(echo $service_url)
     echo "SERVICE_URL = '${service_url}'">>${SEAFILE_CENTRAL_CONF_DIR}/seahub_settings.py
 fi
