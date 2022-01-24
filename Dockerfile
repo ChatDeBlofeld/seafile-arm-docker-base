@@ -10,9 +10,10 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
     wget \
     sudo \
     libmemcached-dev \
-    golang
+    golang-go
 
 # Retrieve seafile build script
+# FIXME: https broken on arm/v7
 RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
 RUN chmod u+x build.sh
 
