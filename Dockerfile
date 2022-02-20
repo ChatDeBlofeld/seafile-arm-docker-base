@@ -68,8 +68,9 @@ RUN chmod -R g+w .
 
 FROM ubuntu:focal
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
+    tzdata \
     procps \
     sqlite3 \
     libmariadb3 \
