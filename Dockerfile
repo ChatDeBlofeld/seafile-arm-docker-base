@@ -1,26 +1,35 @@
 ARG SEAFILE_SERVER_VERSION
 
-FROM ubuntu:focal AS builder
+# FIXME: - wget does not work with TLS on focal arm/v7
+#        - build does not work on impish, see https://github.com/haiwen/seafile-rpi/issues/109
+#        - jammy seems ok but is still experimental (libc issue though)...
+#        - debian images do not support riscv
+FROM ubuntu:jammy AS builder
 
 ARG SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
 ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
+    tzdata \
     wget \
     sudo \
     libmemcached-dev \
-    golang-go
+    # needed for pillow to properly display captcha (and something else?)
+    libfreetype-dev 
 
 # Retrieve seafile build script
-# FIXME: https broken on arm/v7
 RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
 RUN chmod u+x build.sh
 
 # Build each component separately for better cache and easy debug in case of failure
 
 # Install dependencies and thirdparty requirements
-RUN ./build.sh -D -v $SEAFILE_SERVER_VERSION \
+# FIXME: tmpfs mount to prevent some odd qemu issue when building a rust
+# dependency targeting a 32 bits platform on a 64 bits host
+# Affects the cryptography pip package on arm/v7, see this issue for detailed explanations:
+# https://github.com/JonasAlfredsson/docker-nginx-certbot/issues/109
+RUN --mount=type=tmpfs,target=/root/.cargo ./build.sh -D -v $SEAFILE_SERVER_VERSION \
     -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
     -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
 # Build libevhtp
@@ -48,10 +57,6 @@ RUN mkdir seafile \
 
 WORKDIR /seafile
 
-# Copy SQL scripts
-# This should be temporary until the official build process is updated (or not)
-RUN cp -r /haiwen-build/seafile-server/scripts/sql seafile-server-$SEAFILE_SERVER_VERSION
-
 # Additional dependencies
 RUN python3 -m pip install --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
     # Memcached
@@ -66,7 +71,7 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 
 RUN chmod -R g+w .
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
@@ -79,6 +84,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     python3-setuptools \
     python3-ldap \
     python3-sqlalchemy \
+    # FIXME: outdated libc by default, should be fixed on jammy release
+    libc6 \
     # Improve Mysql 8 suppport
     python3-cryptography \
     # Folowing libs are useful for the armv7 arch only
@@ -87,6 +94,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libopenjp2-7 \
     libtiff5 \
     libxcb1 \
+    # TODO: Can probably be removed
     libfreetype6 && \
     rm -rf /var/lib/apt/lists/*
 
