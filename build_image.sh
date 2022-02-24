@@ -1,11 +1,14 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
-echo "Loading environment..."
-set -a
-[ -f .env ] && . .env
-set +a
+if [ -z "$NO_ENV" ]
+then
+    echo "Loading environment..."
+    set -a
+    [ -f .env ] && . .env
+    set +a
+fi
 
 while getopts R:D:r:u:i:t:v:h:d:l:P:p flag
 do
@@ -25,8 +28,8 @@ do
            ;;
         h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
-        :) exit;;
-        \?) exit;; 
+        :) exit 1;;
+        \?) exit 1;; 
     esac
 done
 
@@ -57,10 +60,11 @@ docker buildx use $BUILDER
 #   sleep 2
 # fi
 
+set -x
 # Build image
 docker buildx build \
     --build-arg REVISION="$REVISION" \
     --build-arg SEAFILE_SERVER_VERSION="$SEAFILE_SERVER_VERSION" \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB="$PYTHON_REQUIREMENTS_URL_SEAHUB" \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV="$PYTHON_REQUIREMENTS_URL_SEAFDAV" \
-    $OUTPUT --platform "$MULTIARCH_PLATFORMS" "$TAGS" "$DOCKERFILE_DIR"
+    $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"

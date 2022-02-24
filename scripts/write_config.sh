@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 CONFIG_DIR="./conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"

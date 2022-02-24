@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 export PYTHONPATH=${PYTHONPATH}:/opt/seafile/seafile-server-${SEAFILE_SERVER_VERSION}/seahub/thirdpart
 

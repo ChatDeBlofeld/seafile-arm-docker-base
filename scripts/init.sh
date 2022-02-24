@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 function print() {
     echo "$(date -Iseconds) [Init] $*"
@@ -80,7 +80,7 @@ ln -s /shared/media ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub
 
 print "Running installation script"
 LOGFILE=./install.log
-./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh "$AUTO" |& tee $LOGFILE
+(set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE; exit 0)
 
 # Handle db starting twice at init edge case 
 if [[ "$AUTO" && ! "$SQLITE" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
@@ -101,7 +101,7 @@ then
     fi
 
     print "Retrying install"
-    ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh "$AUTO" | tee $LOGFILE
+    ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
 fi
 
 if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
