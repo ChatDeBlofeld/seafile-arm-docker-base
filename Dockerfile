@@ -90,13 +90,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     python3-cryptography \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
-    # libjpeg62-turbo \
     libopenjp2-7 \
     libtiff5 \
     libxcb1 \
-    # TODO: Can probably be removed
-    libfreetype6 && \
-    rm -rf /var/lib/apt/lists/*
+    libfreetype6 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
 
