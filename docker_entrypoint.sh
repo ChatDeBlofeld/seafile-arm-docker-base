@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -Eeuo pipefail
+set -Eeo pipefail
 
 function print() {
     echo "$(date -Iseconds) [Entrypoint] $*"
