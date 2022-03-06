@@ -1,10 +1,10 @@
 ARG SEAFILE_SERVER_VERSION
 
-# FIXME: - wget does not work with TLS on focal arm/v7
-#        - build does not work on impish, see https://github.com/haiwen/seafile-rpi/issues/109
-#        - jammy seems ok but is still experimental (libc issue though)...
+# FIXME: - TLS broken on focal (arm/v7) + can't build libevhtp on arm/v7 (no fix atm)
+#        - build issue with automake on impish, see https://github.com/haiwen/seafile-rpi/issues/109
+#        - jammy is still experimental + libc issue
 #        - debian images do not support riscv
-FROM ubuntu:jammy AS builder
+FROM ubuntu:impish AS builder
 
 ARG SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
@@ -16,7 +16,10 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
     sudo \
     libmemcached-dev \
     # needed for pillow to properly display captcha (and something else?)
-    libfreetype-dev 
+    libfreetype-dev
+
+# FIXME: TLS broken on arm/v7 on focal
+# RUN update-ca-certificates -f
 
 # Retrieve seafile build script
 RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
@@ -53,15 +56,21 @@ RUN ./build.sh -8 -v $SEAFILE_SERVER_VERSION
 RUN tar -xzf built-seafile-server-pkgs/*.tar.gz
 RUN mkdir seafile \
     && mv seafile-server-$SEAFILE_SERVER_VERSION seafile \
-    && mv /haiwen-build/seafile-server/fileserver/fileserver seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/bin/
+    && mv /haiwen-build/seafile-server/fileserver/fileserver seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/bin/ \
+    # FIXME: python libs saved in wrong directory on impish
+    && mkdir /seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/lib/python3 \
+    && cp -r /usr/lib/python3.9/site-packages /seafile/seafile-server-$SEAFILE_SERVER_VERSION/seafile/lib/python3
 
 WORKDIR /seafile
 
 # Additional dependencies
-RUN python3 -m pip install --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
+RUN python3 -m pip install --force-reinstall --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
     # Memcached
     pylibmc \
-    django-pylibmc
+    django-pylibmc \
+    # FIXME: breaking change in markupsafe: https://github.com/pallets/markupsafe/issues/284
+    markupsafe==2.0.1 \
+    && rm -rf seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart/*/__pycache__
 
 # Prepare media folder to be exposed
 RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . && echo $SEAFILE_SERVER_VERSION > ./media/version
@@ -71,7 +80,7 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 
 RUN chmod -R g+w .
 
-FROM ubuntu:jammy
+FROM ubuntu:impish
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
@@ -84,8 +93,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     python3-setuptools \
     python3-ldap \
     python3-sqlalchemy \
-    # FIXME: outdated libc by default, should be fixed on jammy release
-    libc6 \
+    # FIXME: outdated libc by default on jammy, should be fixed on final release
+    # libc6 \
     # Improve Mysql 8 suppport
     python3-cryptography \
     # Folowing libs are useful for the armv7 arch only
