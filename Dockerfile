@@ -103,6 +103,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libtiff5 \
     libxcb1 \
     libfreetype6 \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
