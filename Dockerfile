@@ -27,14 +27,8 @@ RUN chmod u+x build.sh
 
 # Build each component separately for better cache and easy debug in case of failure
 
-# Install dependencies and thirdparty requirements
-# FIXME: tmpfs mount to prevent some odd qemu issue when building a rust
-# dependency targeting a 32 bits platform on a 64 bits host
-# Affects the cryptography pip package on arm/v7, see this issue for detailed explanations:
-# https://github.com/JonasAlfredsson/docker-nginx-certbot/issues/109
-RUN --mount=type=tmpfs,target=/root/.cargo ./build.sh -D -v $SEAFILE_SERVER_VERSION \
-    -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
-    -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
+# Install build dependencies
+RUN ./build.sh -D -v $SEAFILE_SERVER_VERSION
 # Build libevhtp
 RUN ./build.sh -1 -v $SEAFILE_SERVER_VERSION
 # Build libsearpc
@@ -43,6 +37,16 @@ RUN ./build.sh -2 -v $SEAFILE_SERVER_VERSION
 RUN ./build.sh -3 -v $SEAFILE_SERVER_VERSION
 # Build seafile (go_fileserver)
 RUN ./build.sh -4 -v $SEAFILE_SERVER_VERSION
+
+# Install dependencies and thirdparty requirements
+# FIXME: tmpfs mount to prevent some odd qemu issue when building a rust
+# dependency targeting a 32 bits platform on a 64 bits host
+# Affects the cryptography pip package on arm/v7, see this issue for detailed explanations:
+# https://github.com/JonasAlfredsson/docker-nginx-certbot/issues/109
+RUN --mount=type=tmpfs,target=/root/.cargo ./build.sh -T -v $SEAFILE_SERVER_VERSION \
+    -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
+    -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
+
 # Build seahub
 RUN ./build.sh -5 -v $SEAFILE_SERVER_VERSION
 # Build seafobj
