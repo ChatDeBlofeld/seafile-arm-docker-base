@@ -10,11 +10,12 @@ then
     set +a
 fi
 
-while getopts R:D:r:u:i:t:v:h:d:l:P:p flag
+while getopts R:D:r:u:i:t:v:h:d:l:P:f:p flag
 do
     case "${flag}" in
         R) REVISION=$OPTARG;;
         D) DOCKERFILE_DIR=$OPTARG;;
+        f) DOCKERFILE="$OPTARG";;
         r) REGISTRY="$OPTARG/";;
         u) REPOSITORY=$OPTARG;;
         i) IMAGE=$OPTARG;;
@@ -33,7 +34,8 @@ do
     esac
 done
 
-if DOCKERFILE_DIR=""; then DOCKERFILE_DIR="."; fi
+if [ ! "$DOCKERFILE_DIR" ]; then DOCKERFILE_DIR="."; fi
+if [ ! "$DOCKERFILE" ]; then DOCKERFILE="Dockerfile"; fi
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$ROOT_DIR"
@@ -63,6 +65,7 @@ docker buildx use $BUILDER
 set -x
 # Build image
 docker buildx build \
+    -f "$DOCKERFILE" \
     --build-arg REVISION="$REVISION" \
     --build-arg SEAFILE_SERVER_VERSION="$SEAFILE_SERVER_VERSION" \
     --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB="$PYTHON_REQUIREMENTS_URL_SEAHUB" \
