@@ -21,6 +21,7 @@ function writeGunicornSettings() {
 }
 
 function writeSeahubConfiguration() {
+    sed -ni "/SERVICE_URL/!p" $SEAHUB_CONFIG_FILE
     echo "SERVICE_URL = \"http${HTTPS_SUFFIX}://${SERVER_IP}\"" >> $SEAHUB_CONFIG_FILE
     echo "FILE_SERVER_ROOT = \"http${HTTPS_SUFFIX}://${SERVER_IP}/seafhttp\"" >> $SEAHUB_CONFIG_FILE
 }
