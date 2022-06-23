@@ -1,8 +1,8 @@
-FROM franchetti/seafile-arm:builder AS builder
+ARG BUILDER_IMAGE
+
+FROM $BUILDER_IMAGE AS builder
 
 ARG SEAFILE_SERVER_VERSION
-ARG PYTHON_REQUIREMENTS_URL_SEAHUB
-ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 # Build libevhtp
 RUN ./build.sh -1 -v $SEAFILE_SERVER_VERSION
@@ -12,6 +12,9 @@ RUN ./build.sh -2 -v $SEAFILE_SERVER_VERSION
 RUN ./build.sh -3 -v $SEAFILE_SERVER_VERSION
 # Build seafile (go_fileserver)
 RUN ./build.sh -4 -v $SEAFILE_SERVER_VERSION
+
+ARG PYTHON_REQUIREMENTS_URL_SEAHUB
+ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
 # Install dependencies and thirdparty requirements
 # FIXME: tmpfs mount to prevent some odd qemu issue when building a rust

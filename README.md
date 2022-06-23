@@ -28,11 +28,13 @@ Options:
                         amd64
     -p              Push the image(s) to the remote registry. Incompatible with -l.
     -R              Image revision
-    -D              Dockerfile directory (default: current directory)
+    -f              Set a specific Dockerfile (default: Dockerfile)
+    -D              Build directory (default: current directory)
     -P              Override the default platform list. Incompatible with -l.
     -v              Set seafile server version to build
     -h              Set python requirement file for seahub
     -d              Set python requirement file for seafdav
+    -B              Builder image used to build Seafile
     -r              Registry to which upload the image
     -u              Repository to which upload the image
     -i              Image name
@@ -44,7 +46,11 @@ Example:
 $ ./build_image.sh -t 8 -t latest -l amd64
 ```
 
-##  Run
+### Builder
+
+Image used to cache build dependencies in Dockerfile first stage can be built using the `Dockerfile.builder` file.
+
+## Run
 
 Example of run, see below for a more detailed description of the arguments:
 
