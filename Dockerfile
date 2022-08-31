@@ -16,12 +16,23 @@ RUN ./build.sh -4 -v $SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
 ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
+# FIXME: fix cryptography install failure, would be nice to use venv
+# everywhere in the future as recommended by pip
+# SHELL command is necessary to actiavte venv
+SHELL ["/bin/bash", "-c"]
+RUN apt-get install -y python3-venv \
+    && python3 -m venv --system-site-packages venv
+# FIXME: No f idea why is this total non-sense necessary but it is,
+# does it fix some broken links by luck?
+RUN pip install -U setuptools
 # Install dependencies and thirdparty requirements
 # FIXME: tmpfs mount to prevent some odd qemu issue when building a rust
 # dependency targeting a 32 bits platform on a 64 bits host
 # Affects the cryptography pip package on arm/v7, see this issue for detailed explanations:
 # https://github.com/JonasAlfredsson/docker-nginx-certbot/issues/109
-RUN --mount=type=tmpfs,target=/root/.cargo ./build.sh -T -v $SEAFILE_SERVER_VERSION \
+RUN --mount=type=tmpfs,target=/root/.cargo \
+    source venv/bin/activate \
+    && ./build.sh -T -v $SEAFILE_SERVER_VERSION \
     -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
     -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
 
