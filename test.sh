@@ -1,114 +1,86 @@
 #!/bin/bash
 
-set -Eeo pipefail
+set -Eo pipefail
 
-function sdbms() {
-    if [ $dbms -eq 0 ]; then
-        sdbms="SQLite"
-    elif [ $dbms -eq 1 ]; then
-        sdbms="MariaDB"
-    else
-        sdbms="MySQL"
-    fi
-}
-
-function stest_case() {
-    if [ $test_case -eq 0 ]; then
-        stest_case="new instance"
-    elif [ $test_case -eq 1 ]; then
-        stest_case="go fileserver"
-    else
-        stest_case="update"
-    fi
-}
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
 
 function print() {
-    echo "[$platform|$sdbms|$stest_case] $@"
-}
-
-function exec() {
-    docker exec $CONTAINER_NAME $@
-}
-
-function init_go_fileserver() {
-    print "Prepare go fileserver tests"
-
-}
-
-function clean_go_fileserver() {
-    print "Clean go fileserver tests"
+    echo -e "[$platform|$sdbms|$stest_case] $@"
 }
 
 function init_update() {
     print "Prepare update tests"
-    sed -i "s/SEAFILE_IMAGE=.*/SEAFILE_IMAGE=${IMAGE_FQN}:${OLD_VERSION}/" $config
-}
+    sed -i "s#SEAFILE_IMAGE=.*#SEAFILE_IMAGE=${IMAGE_FQN}:${OLD_VERSION}#" $TOPOLOGY_DIR/.env
+    launch
 
-function clean_update() {
-    print "Clean update tests"
+    if [ $? -ne 0 ]; then 
+        print "Launching previous version failed"
+        return 1
+    fi
+
+    sed -i "s#SEAFILE_IMAGE=.*#SEAFILE_IMAGE=${IMAGE_FQN}:${platform}#" $TOPOLOGY_DIR/.env
 }
 
 function init_new_instance(){
     print "Prepare new instance tests"
 }
 
-function clean_new_instance(){
-    print "Clean new instance tests"
+function launch() {
+    $TOPOLOGY_DIR/compose.sh up -d &> /dev/null
+    timeout=${timeout:=180}
+    c=1
+    while [[ "$(docker logs $CONTAINER_NAME |& grep -Pc '^Done\.$')" != "2" && $c -lt $timeout ]]
+    do
+        sleep 1
+        let c++
+    done
+
+    if [ $c -eq $timeout ]; then 
+        return 1
+    fi
 }
 
 function do_tests() {
-    init_funcs=( init_new_instance init_go_fileserver init_update )
-    clean_funcs=( clean_new_instance clean_go_fileserver clean_update )
+    lsdbms=( "SQLite" "MariaDB" "MySQL" )
+    stest_cases=( "New instance" "Major update" )
+    init_funcs=( init_new_instance init_update )
+    FAILED=0
 
-    for dbms in 0 1 2
+    for dbms in "${!lsdbms[@]}"
     do 
-        write_env
-        sdbms
+        sdbms=${lsdbms[$dbms]}
 
         for test_case in "${!init_funcs[@]}"
         do
-            stest_case
+            stest_case=${stest_cases[$test_case]}
+            write_env
             ${init_funcs[$test_case]}
 
-            print "Launch Seafile"
-            $TOPOLOGY_DIR/compose.sh up -d &> /dev/null
-            TIMEOUT=${TIMEOUT:=120}
-            c=1
-            while [[ "$(docker logs $CONTAINER_NAME |& grep -Pc '^Done\.$')" != "2" && $c -lt $TIMEOUT ]]
-            do
-                sleep 1
-                let c++
-            done
-            docker network connect --alias "$WEB_HOSTNAME" "$FAKE_NETWORK" "$TOPOLOGY-reverse-proxy-1"
-
-            if [ $c -eq $TIMEOUT ]; then 
-                print "Launch reached timeout, pass"
-                # TODO: write log to file
+            if [ $? -ne 0 ]; then 
+                print "${RED}Initialization failed, pass${NC}"
+                FAILED=1
             else
-                print "Launch tests"
-                # TODO: e2e with codecept.js
-                docker run --rm --net=seafile-ci --user pwuser -v $ROOT_DIR/tests:/tests \
-                    -e SEAFILE_SERVER_VERSION=$SEAFILE_SERVER_VERSION \
-                    -e URL=$URL \
-                    -e PORT=$PORT \
-                    -e SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL \
-                    -e SEAFILE_ADMIN_PASSWORD=$SEAFILE_ADMIN_PASSWORD \
-                    codeceptjs/codeceptjs &> $ROOT_DIR/tests/logs/.log
+                print "Launch Seafile"
+                launch
 
-                if [ $? -ne 0 ]; then
-                    print "FAILED"
+                if [ $? -ne 0 ]; then 
+                    print "${RED}Launch failed, pass${NC}"
+                    # TODO: write log to file
+                else
+                    print "Launch tests"
+                    $ROOT_DIR/tests/api_tests.sh
+
+                    if [ $? -ne 0 ]; then
+                        FAILED=1
+                        print "${RED}Failed${NC}"
+                    fi
                 fi
-                # docker run --rm  -it --net=seafile-ci --user pwuser -v $PWD/tests:/tests codeceptjs/codeceptjs /bin/bash
-                # docker run --rm  -it --net=seafile-ci -v $PWD/tests:/tests codeceptjs/codeceptjs /bin/bash
-                # docker run --rm --net=seafile-ci --user pwuser -v $PWD/tests:/tests codeceptjs/codeceptjs
             fi
 
-            # Cleaning
-            ${clean_funcs[$test_case]}
-            ./compose.sh down -v
-
-            # TODO: remove
-            exit
+            print "Cleaning..."
+            $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
         done
     done
 }
@@ -118,16 +90,21 @@ function write_env() {
 
     echo "DBMS=$dbms
     NOSWAG=1
-    NOSWAG_PORT=44444
+    NOSWAG_PORT=$PORT
     SEAFILE_IMAGE=$IMAGE_FQN:$platform
-    URL=$URL
+    HOAT=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
     SEAFILE_ADMIN_PASSWORD=$SEAFILE_ADMIN_PASSWORD
     USE_HTTPS=0
     MYSQL_HOST=db
     MYSQL_USER_PASSWD=secret
-    MYSQL_ROOT_PASSWD=secret" > .env
+    MYSQL_ROOT_PASSWD=secret
+    SEAFILE_CONF_DIR=conf
+    SEAFILE_LOGS_DIR=logs
+    SEAFILE_DATA_DIR=data
+    SEAFILE_SEAHUB_DIR=seahub
+    DATABASE_DIR=db" > $TOPOLOGY_DIR/.env
 }
 
 echo "Loading environment..."
@@ -151,7 +128,8 @@ do
            ;;
         h) export PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) export PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
-        o) export OLD_VERSION=$OPTARG;;
+        o) OLD_VERSION=$OPTARG;;
+        B) BUILD=1;;
         :) exit;;
         \?) exit;; 
     esac
@@ -167,34 +145,36 @@ IMAGE_FQN=$REGISTRY$REPOSITORY/$IMAGE
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR
 
-echo "Build images"
-export NO_ENV=1
-# ./build_image.sh
+if [ "$BUILD" = "1" ]
+then
+    echo "Build images"
+    export NO_ENV=1
+    ./build_image.sh
+fi
 
 echo "Set up test topology"
-# git clone https://github.com/ChatDeBlofeld/seafile-arm-docker
-TOPOLOGY=seafile-test
+TOPOLOGY=test-topology
 TOPOLOGY_DIR=$ROOT_DIR/$TOPOLOGY
+cd $ROOT_DIR
+rm -rf $TOPOLOGY_DIR
+git clone https://github.com/ChatDeBlofeld/seafile-arm-docker $TOPOLOGY &> /dev/null
 CONTAINER_NAME=$TOPOLOGY-seafile-1
-FAKE_NETWORK=seafile-ci
+cd $TOPOLOGY_DIR
+
 
 # Runtime variables
-URL=seafile.local
-PORT=80
-SEAFILE_ADMIN_EMAIL=you@your.email
-SEAFILE_ADMIN_PASSWORD=secret
+export HOST=127.0.0.1
+export PORT=44444
+export SEAFILE_ADMIN_EMAIL=you@your.email
+export SEAFILE_ADMIN_PASSWORD=secret
 
-cp -r $ROOT_DIR/seafile-arm-docker $TOPOLOGY_DIR
-cd $TOPOLOGY_DIR
 sed -i 's/#~//g' compose.seafile.common.yml
-if [ ! "$(docker network ls | grep ${FAKE_NETWORK})" ]; then
-     docker network create "$FAKE_NETWORK"
-fi
+write_env &> /dev/null
+$TOPOLOGY_DIR/compose.sh down -v &> /dev/null
 
 echo "Write nginx config"
 config=$TOPOLOGY_DIR/nginx/seafile.noswag.conf
-sed -i "s/your\.domain/${URL}/" $config
-# TODO: modify file upstream
+sed -i "s/your\.domain/${HOST}/" $config
 sed -i 's/#~//g' $config
 
 IFS=',' read -r -a PLATFORMS <<< "$MULTIARCH_PLATFORMS"
@@ -203,17 +183,24 @@ for platform in "${PLATFORMS[@]}"
 do
     platform=$(sed 's#linux/\(.*\)#\1#' <<< $platform)
 
-    echo "Export $platform image to local images"
-    # $ROOT_DIR/build_image.sh -t "$platform" -l "$platform"
-
-    do_tests "$platform"
-    
-    echo "Cleaning image..."
-    # todo : compose down ?
-    # ./compose.sh down -v
-    # docker rmi "$IMAGE_FQN":"$platform"
+    if [ "$BUILD" = 1 ]
+    then
+        echo "Export $platform image to local images"
+        $ROOT_DIR/build_image.sh -t "$platform" -l "$platform"
+    elif [ "$(docker images -qf reference="${IMAGE_FQN}:${platform}")" = "" ]
+    then
+        echo -e "${RED}Can't find image for ${platform}, pass${NC}"
+        FAILED=1
+    else
+        do_tests "$platform"
+    fi
 done
 
 echo "Clean topology"
-docker network rm "$FAKE_NETWORK"
-# rm -rf $TOPOLOGY_DIR
+rm -rf $TOPOLOGY_DIR
+
+if [[ FAILED -ne 0 ]]; then
+    echo -e "${RED}FAILED${NC}"
+else
+    echo -e "${GREEN}SUCCESS${NC}"
+fi
