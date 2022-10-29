@@ -70,7 +70,7 @@ function do_tests() {
                     # TODO: write log to file
                 else
                     print "Launch tests"
-                    $ROOT_DIR/tests/api_tests.sh
+                    $ROOT_DIR/tests/seahub_tests.sh
 
                     if [ $? -ne 0 ]; then
                         FAILED=1
@@ -159,6 +159,8 @@ cd $ROOT_DIR
 rm -rf $TOPOLOGY_DIR
 git clone https://github.com/ChatDeBlofeld/seafile-arm-docker $TOPOLOGY &> /dev/null
 CONTAINER_NAME=$TOPOLOGY-seafile-1
+rm -rf logs
+mkdir logs
 cd $TOPOLOGY_DIR
 
 
@@ -167,6 +169,7 @@ export HOST=127.0.0.1
 export PORT=44444
 export SEAFILE_ADMIN_EMAIL=you@your.email
 export SEAFILE_ADMIN_PASSWORD=secret
+export LOGS_FOLDER=$ROOT_DIR/logs
 
 sed -i 's/#~//g' compose.seafile.common.yml
 write_env &> /dev/null
