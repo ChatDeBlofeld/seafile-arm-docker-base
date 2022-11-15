@@ -20,7 +20,8 @@ ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 # everywhere in the future as recommended by pip
 # SHELL command is necessary to actiavte venv
 SHELL ["/bin/bash", "-c"]
-RUN apt-get install -y python3-venv \
+RUN apt-get update \
+    && apt-get install -y python3-venv \
     && python3 -m venv --system-site-packages venv
 # FIXME: No f idea why is this total non-sense necessary but it is,
 # does it fix some broken links by luck?
