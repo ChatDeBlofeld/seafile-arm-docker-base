@@ -112,7 +112,7 @@ set -o allexport
 [ -f .env ] && . .env
 set +o allexport
 
-while getopts R:D:r:u:i:v:h:d:l:P:o: flag
+while getopts R:D:r:u:i:v:h:d:l:P:o:B flag
 do
     case "${flag}" in
         R) export REVISION=$OPTARG;;
