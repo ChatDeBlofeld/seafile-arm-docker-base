@@ -48,7 +48,7 @@ $ ./build_image.sh -t 8 -t latest -l amd64
 
 ### Builder
 
-Image used to cache build dependencies in Dockerfile first stage can be built using the `Dockerfile.builder` file.
+Image used to cache build dependencies in Dockerfile first stage can be built using the `Dockerfile.builder` file with the `-f` option.
 
 ## Run
 
@@ -90,7 +90,7 @@ In bridge mode (default), some ports have to be published for the host to reach 
 
 The installation is auto-configured and ready to be used behind Apache/Nginx, [as recommended in the manual](https://manual.seafile.com/deploy/using_mysql/#starting-seafile-server-and-seahub-website).
 
-### Parameters
+### Basic parameters
 
 All these parameters have to be passed as environment variables. Except for `PUID`, `GUID` and `TZ`, they're useful for initialization only (first run) and can be removed afterwards (even mandatory ones).
 
@@ -123,6 +123,16 @@ I you want a MySQL/MariaDB deployment, you'll have to/can deal with some additio
 |`CCNET_DB`|*(Optional)* Name of the ccnet db. *Default: ccnet_db*|
 |`SEAFILE_DB`|*(Optional)* Name of the seafile db. *Default: seafile_db*|
 |`SEAHUB_DB`|*(Optional)* Name of the seahub db. *Default: seahub_db*|
+
+### Extensions and customization
+
+In addition of the basic configuration described above, you can tune your configuration (as described in the [Seafile manual](https://manual.seafile.com/)) using the optional parameters below (at **initialization only**).
+
+You can of course edit the various config files yourself but those configurations are not tested and may or may not work, consult the open issues to know if there are known problems about what you want to use.
+
+| Parameter | Description |
+|:-|:-|
+|`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
 
 ### Manual setup 
 
@@ -160,8 +170,6 @@ volume_root
 └── sqlite (SQLite installation only)
 ```
 
-## Customization
-
-By editing files in the `conf` folder, you should be able to customize your installation as described in the [Seafile manual](https://manual.seafile.com/). All functionalities haven't been tested though and may or may not work, consult the open issues to know if there are known problems about what you want to use.
+## Miscellaneous
 
 >Performance hint: for few users, decrease the number of workers in `gunicorn.conf.py` for lower RAM usage.
