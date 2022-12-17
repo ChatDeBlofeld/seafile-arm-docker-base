@@ -12,6 +12,7 @@ function print() {
 
 function init_update() {
     print "Prepare update tests"
+    MIN_VERSION=$OLD_VERSION
     sed -i "s#SEAFILE_IMAGE=.*#SEAFILE_IMAGE=${IMAGE_FQN}:${OLD_VERSION}#" $TOPOLOGY_DIR/.env
     launch
 
@@ -25,6 +26,7 @@ function init_update() {
 
 function init_new_instance(){
     print "Prepare new instance tests"
+    MIN_VERSION=$MAJOR_VERSION
 }
 
 function launch() {
@@ -38,6 +40,23 @@ function launch() {
     done
 
     if [ $c -eq $timeout ]; then 
+        return 1
+    fi
+}
+
+function check_memcached() {
+    if [[ $failed -ne 0 || $MEMCACHED_MIN_VERSION -gt $MIN_VERSION ]]; then
+        return 0
+    fi
+
+    echo "------- MEMCACHED TEST -------"
+    echo "Check if memcached is configured correctly"
+    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached)
+
+    if [ ! "$(echo $memcached_logs | grep 'STORED')" ]
+    then
+        echo "Memcached is not set correctly"
+        echo $memcached_logs > $LOGS_FOLDER/memcached_logs-$(date +"%s")
         return 1
     fi
 }
@@ -70,9 +89,11 @@ function do_tests() {
                     # TODO: write log to file
                 else
                     print "Launch tests"
-                    $ROOT_DIR/tests/seahub_tests.sh
+                    failed=0
+                    $ROOT_DIR/tests/seahub_tests.sh || failed=1
+                    check_memcached || failed=1
 
-                    if [ $? -ne 0 ]; then
+                    if [ $failed -ne 0 ]; then
                         FAILED=1
                         print "${RED}Failed${NC}"
                     fi
@@ -92,7 +113,7 @@ function write_env() {
     NOSWAG=1
     NOSWAG_PORT=$PORT
     SEAFILE_IMAGE=$IMAGE_FQN:$platform
-    HOAT=$HOST
+    HOST=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
     SEAFILE_ADMIN_PASSWORD=$SEAFILE_ADMIN_PASSWORD
@@ -104,15 +125,17 @@ function write_env() {
     SEAFILE_LOGS_DIR=logs
     SEAFILE_DATA_DIR=data
     SEAFILE_SEAHUB_DIR=seahub
-    DATABASE_DIR=db" > $TOPOLOGY_DIR/.env
+    DATABASE_DIR=db
+    MEMCACHED_HOST=memcached:11211" > $TOPOLOGY_DIR/.env
 }
 
 echo "Loading environment..."
 set -o allexport
 [ -f .env ] && . .env
 set +o allexport
+[ -f ./tests/feature_table.env ] && . ./tests/feature_table.env
 
-while getopts R:D:r:u:i:v:h:d:l:P:o:B flag
+while getopts R:D:r:u:i:v:h:d:l:P:o:b:B flag
 do
     case "${flag}" in
         R) export REVISION=$OPTARG;;
@@ -129,6 +152,7 @@ do
         h) export PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) export PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
         o) OLD_VERSION=$OPTARG;;
+        b) BRANCH=$OPTARG;;
         B) BUILD=1;;
         :) exit;;
         \?) exit;; 
@@ -139,7 +163,9 @@ if [ ! "$OLD_VERSION" ]; then
     echo "Missing OLD_VERSION"
     exit
 fi
+
 if [ "$REGISTRY" != "" ]; then REGISTRY="$REGISTRY/"; fi
+if [ "$BRANCH" == "" ]; then BRANCH="master"; fi
 IMAGE_FQN=$REGISTRY$REPOSITORY/$IMAGE
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -153,6 +179,7 @@ then
 fi
 
 echo "Set up test topology"
+MAJOR_VERSION=${SEAFILE_SERVER_VERSION%%.*}
 TOPOLOGY=test-topology
 TOPOLOGY_DIR=$ROOT_DIR/$TOPOLOGY
 cd $ROOT_DIR
@@ -162,6 +189,7 @@ CONTAINER_NAME=$TOPOLOGY-seafile-1
 rm -rf logs
 mkdir logs
 cd $TOPOLOGY_DIR
+git checkout $BRANCH
 
 
 # Runtime variables
@@ -190,7 +218,9 @@ do
     then
         echo "Export $platform image to local images"
         $ROOT_DIR/build_image.sh -t "$platform" -l "$platform"
-    elif [ "$(docker images -qf reference="${IMAGE_FQN}:${platform}")" = "" ]
+    fi
+    
+    if [ "$(docker images -qf reference="${IMAGE_FQN}:${platform}")" = "" ]
     then
         echo -e "${RED}Can't find image for ${platform}, pass${NC}"
         FAILED=1

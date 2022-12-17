@@ -8,7 +8,7 @@ function print() {
 }
 
 function print_log() {
-    echo "$@" > $LOGS/$LOG_FILE
+    echo "$@" > $LOGS_FOLDER/$LOG_FILE
 }
 
 function authorization() {
@@ -165,7 +165,7 @@ function avatar_folder() {
     fi
 }
 
-echo "------ SEAHUB TESTS ------"
+echo "-------- SEAHUB TESTS --------"
 
 tests=(authorization default_library list_libraries upload_link upload_file download_link download_file ui_auth media_folder avatar_upload avatar_folder)
 LOG_FILE=seahub_logs-$(date +"%s")
