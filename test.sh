@@ -65,7 +65,6 @@ function do_tests() {
     lsdbms=( "SQLite" "MariaDB" "MySQL" )
     stest_cases=( "New instance" "Major update" )
     init_funcs=( init_new_instance init_update )
-    FAILED=0
 
     for dbms in "${!lsdbms[@]}"
     do 
