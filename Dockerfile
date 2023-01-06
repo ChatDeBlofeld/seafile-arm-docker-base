@@ -16,26 +16,20 @@ RUN ./build.sh -4 -v $SEAFILE_SERVER_VERSION
 ARG PYTHON_REQUIREMENTS_URL_SEAHUB
 ARG PYTHON_REQUIREMENTS_URL_SEAFDAV
 
-# FIXME: fix cryptography install failure, would be nice to use venv
-# everywhere in the future as recommended by pip
-# SHELL command is necessary to actiavte venv
-SHELL ["/bin/bash", "-c"]
+# Installing python dependencies, mixing native and pip packages
+# TODO: move native packages installation to builder image
+# FIXME: This is preferred to pip installation since cross-building wheels is probably
+# a circle of hell by itself. A solution would be to have one Dockerfile per arch
+# Point is that native packages are way bigger than pip wheels (no idea why) and thus 
+# the least used archs are currently damaging the others. In addition, if distro version
+# of a package breaks something, it must be installed from pip anyway (most packages can 
+# still be built with pip though, let's say all but "cryptography").
+# Note: native packages need (obviously) to be installed in runtime stage too.
+COPY requirements .
 RUN apt-get update \
-    && apt-get install -y python3-venv \
-    && python3 -m venv --system-site-packages venv
-# FIXME: No f idea why is this total non-sense necessary but it is,
-# does it fix some broken links by luck?
-RUN pip install -U setuptools
-# Install dependencies and thirdparty requirements
-# FIXME: tmpfs mount to prevent some odd qemu issue when building a rust
-# dependency targeting a 32 bits platform on a 64 bits host
-# Affects the cryptography pip package on arm/v7, see this issue for detailed explanations:
-# https://github.com/JonasAlfredsson/docker-nginx-certbot/issues/109
-RUN --mount=type=tmpfs,target=/root/.cargo \
-    source venv/bin/activate \
-    && ./build.sh -T -v $SEAFILE_SERVER_VERSION \
-    -h $PYTHON_REQUIREMENTS_URL_SEAHUB \
-    -d $PYTHON_REQUIREMENTS_URL_SEAFDAV
+    && grep -vE '^#' native.txt | xargs apt-get install -y \
+    && python3 -m pip install -r seafdav.txt --target /haiwen-build/seahub_thirdparty --no-deps \
+    && python3 -m pip install -r seahub.txt --target /haiwen-build/seahub_thirdparty --no-deps
 
 # Build seahub
 RUN ./build.sh -5 -v $SEAFILE_SERVER_VERSION
@@ -54,15 +48,9 @@ RUN mkdir seafile \
 
 WORKDIR /seafile
 
-# Additional dependencies
-RUN python3 -m pip install --force-reinstall --target seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart --upgrade \
-    # Memcached
-    pylibmc \
-    django-pylibmc \
-    && rm -rf seafile-server-$SEAFILE_SERVER_VERSION/seahub/thirdpart/*/__pycache__
-
 # Prepare media folder to be exposed
-RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . && echo $SEAFILE_SERVER_VERSION > ./media/version
+RUN mv seafile-server-$SEAFILE_SERVER_VERSION/seahub/media . \
+    && echo $SEAFILE_SERVER_VERSION > ./media/version
 
 COPY custom/setup-seafile-mysql.py seafile-server-$SEAFILE_SERVER_VERSION/setup-seafile-mysql.py
 COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/db_update_helper.py
@@ -70,6 +58,8 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 RUN chmod -R g+w .
 
 FROM ubuntu:jammy
+
+COPY requirements/native.txt /
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
@@ -79,17 +69,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libmariadb3 \
     libmemcached11 \
     python3 \
-    python3-setuptools \
-    python3-ldap \
-    python3-sqlalchemy \
-    # Improve Mysql 8 suppport
-    python3-cryptography \
     # Folowing libs are useful for the armv7 arch only
     # Since they're not heavy, no need to create separate pipelines atm
     libopenjp2-7 \
     libtiff5 \
     libxcb1 \
     libfreetype6 \
+    && grep -vE '^#' /native.txt | xargs apt-get install --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
@@ -100,7 +86,7 @@ RUN groupadd -g 999 runtime \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && chown seafile:runtime . \
     && chmod g+w .
-
+    
 COPY --from=builder --chown=seafile:runtime /seafile /opt/seafile
 COPY docker_entrypoint.sh /
 COPY --chown=seafile:seafile scripts /home/seafile

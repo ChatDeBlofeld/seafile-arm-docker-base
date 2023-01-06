@@ -1,26 +1,31 @@
 Django==3.2.14
-future
+# future
 captcha
 django-statici18n
 django-webpack_loader==0.7.0
 gunicorn
 mysqlclient
 django-picklefield==2.1.1
-openpyxl
-qrcode
+# openpyxl
+# qrcode
+django-appconf
 django-formtools==2.3
+django-ranged-response
 django-simple-captcha
 djangorestframework==3.11.1
 python-dateutil
-requests
-pillow
-pyjwt==2.1.*
-pycryptodome==3.12.0
-requests_oauthlib
+# requests
+# pillow
+# pyjwt==2.1.*
+# pycryptodome==3.12.0
+# requests_oauthlib
 chardet
 python-cas
 djangosaml2==0.20.0
-pysaml2==6.5.1
-cffi==1.14.6
-Markdown
-bleach
+# pysaml2==6.5.1
+# cffi==1.14.6
+# Markdown
+# bleach
+# pylibmc
+django-pylibmc
+# pyOpenSSL

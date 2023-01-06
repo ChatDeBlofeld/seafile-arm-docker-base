@@ -1,0 +1,67 @@
+# Commented dependencies are transitive dependencies.
+# Direct dependencies are marked with '->'
+python3-asgiref
+# -> jinja2
+# python3-babel
+python3-bleach
+python3-certifi
+python3-cffi
+# -> cffi
+# python3-cffi-backend
+python3-charset-normalizer
+# -> oauthlib, openssl, pysaml2
+# python3-cryptography
+python3-defusedxml
+python3-elementpath
+# -> openpyxl
+# python3-et-xmlfile
+python3-future
+# -> sqlalchemy
+# python3-greenlet
+python3-idna
+# -> markdown
+# python3-importlib-metadata
+# -> pysaml2
+# python3-importlib-resources
+# -> openpyxl
+# python3-jdcal
+python3-jinja2
+python3-json5
+# -> oauthlib
+# python3-jwt
+python3-ldap
+# -> future
+# python3-lib2to3
+# -> openpyxl
+# python3-lxml
+# -> pysaml2
+# python3-mako
+python3-markdown
+# -> jinja2, mako
+# python3-markupsafe
+# -> python3-requests-oauthlib
+# python3-oauthlib
+python3-openpyxl
+# -> pysaml2
+# python3-openssl
+python3-pam
+python3-pil
+python3-pycparser
+python3-pycryptodome
+python3-pylibmc
+python3-pysaml2
+python3-pytzdata
+python3-qrcode
+python3-requests
+python3-requests-oauthlib
+python3-six
+python3-sqlalchemy
+python3-sqlparse
+# -> babel, pysaml2
+# python3-tz
+python3-urllib3
+# -> pysaml2
+# python3-xmlschema
+python3-yaml
+# -> importlib-metadata, importlib-resources
+# python3-zipp
