@@ -40,6 +40,7 @@ function launch() {
     done
 
     if [ $c -eq $timeout ]; then 
+        docker logs $CONTAINER_NAME > $LOGS_FOLDER/launch-$(date +"%s")
         return 1
     fi
 }
@@ -79,24 +80,26 @@ function do_tests() {
             if [ $? -ne 0 ]; then 
                 print "${RED}Initialization failed, pass${NC}"
                 FAILED=1
-            else
-                print "Launch Seafile"
-                launch
+                continue
+            fi
 
-                if [ $? -ne 0 ]; then 
-                    print "${RED}Launch failed, pass${NC}"
-                    # TODO: write log to file
-                else
-                    print "Launch tests"
-                    failed=0
-                    $ROOT_DIR/tests/seahub_tests.sh || failed=1
-                    check_memcached || failed=1
+            print "Launch Seafile"
+            launch
 
-                    if [ $failed -ne 0 ]; then
-                        FAILED=1
-                        print "${RED}Failed${NC}"
-                    fi
-                fi
+            if [ $? -ne 0 ]; then 
+                print "${RED}Launch failed, pass${NC}"
+                FAILED=1
+                continue
+            fi
+
+            print "Launch tests"
+            failed=0
+            $ROOT_DIR/tests/seahub_tests.sh || failed=1
+            check_memcached || failed=1
+
+            if [ $failed -ne 0 ]; then
+                FAILED=1
+                print "${RED}Failed${NC}"
             fi
 
             print "Cleaning..."
@@ -111,7 +114,7 @@ function write_env() {
     echo "DBMS=$dbms
     NOSWAG=1
     NOSWAG_PORT=$PORT
-    SEAFILE_IMAGE=$IMAGE_FQN:$platform
+    SEAFILE_IMAGE=$IMAGE_FQN:$tag
     HOST=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
@@ -211,20 +214,21 @@ IFS=',' read -r -a PLATFORMS <<< "$MULTIARCH_PLATFORMS"
 
 for platform in "${PLATFORMS[@]}"
 do
-    platform=$(sed 's#linux/\(.*\)#\1#' <<< $platform)
+    platform="$(sed 's#linux/##' <<< $platform)"
+    tag="$(sed 's#/##' <<< $platform)"
 
     if [ "$BUILD" = 1 ]
     then
         echo "Export $platform image to local images"
-        $ROOT_DIR/build_image.sh -t "$platform" -l "$platform"
+        $ROOT_DIR/build_image.sh -t "$tag" -l "$platform"
     fi
     
-    if [ "$(docker images -qf reference="${IMAGE_FQN}:${platform}")" = "" ]
+    if [ "$(docker images -qf reference="${IMAGE_FQN}:${tag}")" = "" ]
     then
         echo -e "${RED}Can't find image for ${platform}, pass${NC}"
         FAILED=1
     else
-        do_tests "$platform"
+        do_tests
     fi
 done
 
