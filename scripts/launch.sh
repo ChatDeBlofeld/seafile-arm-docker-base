@@ -48,6 +48,12 @@ then
     ln -s ../seahub-data/custom /shared/media
 fi
 
+if [ ! -L "./seafile-server-latest/seahub/media" ]
+then
+    print "Linking media folder with the volume"
+    ln -s /shared/media ./seafile-server-latest/seahub
+fi
+
 if [ ! -d "./conf" ]
 then
     print "Linking internal configuration and data folders with the volume"
@@ -55,12 +61,12 @@ then
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
-    ln -s /shared/media ./seafile-server-latest/seahub
     if [ -d "/shared/sqlite" ]
     then 
         ln -s /shared/sqlite ./ccnet
         ln -s /shared/sqlite/seahub.db .
-    else
+    elif [ ! -d "./ccnet" ]
+    then
         mkdir ccnet # Totally useless but still needed for the server to launch
     fi
 fi

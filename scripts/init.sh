@@ -20,7 +20,7 @@ function detectAutoMode() {
     fi
 }
 
-if [[ "$SEAFILE_DIR" || "$SEAHUB_PORT" || "$FILESERVER_PORT" ]] 
+if [[ "$SEAFILE_DIR" || "$SEAHUB_PORT" || "$FILESERVER_PORT" ]]
 then
     print "Unsupported parameters"
     print "Remove references to SEAFILE_DIR, SEAHUB_PORT and FILESERVER_PORT and try again"
@@ -51,7 +51,7 @@ then
 fi
 
 if [ "$SQLITE" != "1" ]
-then 
+then
     print "Using MySQL/MariaDB setup"
     MYSQL="-mysql"
     SQLITE=""
@@ -62,27 +62,40 @@ fi
 detectAutoMode
 cd /opt/seafile
 
-if [[ "$AUTO" && ! "$SQLITE" ]]
+if [ -L "./conf" ]
 then
-    print "Waiting for db"
-    /home/seafile/wait_for_db.sh
+    print "Cleaning old links"
+    rm -rf ./ccnet
+    rm -f ./conf
+    rm -f ./logs
+    rm -f ./seafile-data
+    rm -f ./seafile-server-latest
+    rm -f ./seahub-data
+    rm -f ./seahub.db
 fi
 
 if [ -d "/shared/media" ]
 then
     print "Cleaning media folder"
     rm -rf /shared/media/*
+    rm -f ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub/media
 fi
 
 print "Exposing media folder in the volume"
 cp -r ./media /shared/
 ln -s /shared/media ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub
 
+if [[ "$AUTO" && ! "$SQLITE" ]]
+then
+    print "Waiting for db"
+    /home/seafile/wait_for_db.sh
+fi
+
 print "Running installation script"
 LOGFILE=./install.log
 (set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE; exit 0)
 
-# Handle db starting twice at init edge case 
+# Handle db starting twice at init edge case
 if [[ "$AUTO" && ! "$SQLITE" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
@@ -126,40 +139,19 @@ mkdir /shared/seahub-data/custom
 if [ ! -d "/shared/logs" ]; then mkdir /shared/logs; fi
 # Expose sqlite db
 if [ "$SQLITE" ]
-then 
+then
     if [ ! -d "/shared/sqlite" ]; then mkdir /shared/sqlite; fi
     mv ./seahub.db /shared/sqlite/
     mv /shared/seafile-data/seafile.db /shared/sqlite/
+    ln -s /shared/sqlite/seafile.db /shared/seafile-data/
     mv ./ccnet/* /shared/sqlite/
     rm -rf ./ccnet
-fi
-
-
-if [ ! -d "./seafile-server-latest" ]
-then
-    print "Making symlink to latest version"
-    ln -s seafile-server-"$SEAFILE_SERVER_VERSION" seafile-server-latest
-fi
-
-if [ ! -d "./conf" ]
-then
-    print "Linking internal configuration and data folders with the volume"
-    ln -s /shared/conf .
-    ln -s /shared/seafile-data .
-    ln -s /shared/seahub-data .
-    ln -s /shared/logs .
-    if [ "$SQLITE" ]
-    then 
-        ln -s /shared/sqlite ./ccnet
-        ln -s /shared/sqlite/seafile.db /shared/seafile-data/
-        ln -s /shared/sqlite/seahub.db .
-    fi
 fi
 
 if [ "$AUTO" ]
 then
     print "Setting admin credentials"
-    echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > ./conf/admin.txt
+    echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > /shared/conf/admin.txt
 
     print "Writing configuration"
     /home/seafile/write_config.sh

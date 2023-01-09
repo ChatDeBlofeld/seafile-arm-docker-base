@@ -2,7 +2,7 @@
 
 set -Eeo pipefail
 
-CONFIG_DIR="./conf"
+CONFIG_DIR="/shared/conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
