@@ -38,9 +38,11 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 
 RUN chmod -R g+w .
 
-FROM ubuntu:jammy
+FROM --platform=$TARGETPLATFORM ubuntu:jammy
 
-COPY requirements/native.txt /
+ARG TARGETPLATFORM
+
+COPY requirements /requirements
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
@@ -56,7 +58,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libtiff5 \
     libxcb1 \
     libfreetype6 \
-    && grep -vE '^#' /native.txt | xargs apt-get install --no-install-recommends -y \
+    && /requirements/install.sh -nl $TARGETPLATFORM \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile

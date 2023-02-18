@@ -1,4 +1,6 @@
-FROM ubuntu:jammy
+FROM --platform=$TARGETPLATFORM ubuntu:jammy
+
+ARG TARGETPLATFORM
 
 RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     tzdata \
@@ -23,11 +25,6 @@ RUN ./build.sh -D
 # of a package breaks something, it must be installed from pip anyway (most packages can 
 # still be built with pip though, let's say all but "cryptography").
 # Note: native packages need (obviously) to be installed in runtime stage too.
-COPY requirements .
+COPY requirements /requirements
 
-RUN apt-get update -y \
-    && grep -vE '^#' native.txt | xargs apt-get install -y
-
-RUN mkdir -p /haiwen-build/seahub_thirdparty \
-    && python3 -m pip install -r seafdav.txt --target /haiwen-build/seahub_thirdparty --no-deps \
-    && python3 -m pip install -r seahub.txt --target /haiwen-build/seahub_thirdparty --no-deps
+RUN /requirements/install.sh -pnl $TARGETPLATFORM
