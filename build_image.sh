@@ -67,7 +67,7 @@ docker buildx use $BUILDER
 set -x
 # Build image
 docker buildx build \
-    "$QUIET" \
+    $QUIET \
     -f "$DOCKERFILE" \
     --build-arg REVISION="$REVISION" \
     --build-arg BUILDER_IMAGE="$BUILDER_IMAGE" \
