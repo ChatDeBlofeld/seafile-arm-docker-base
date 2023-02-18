@@ -10,7 +10,7 @@ then
     set +a
 fi
 
-while getopts R:D:r:u:i:t:v:h:d:l:P:f:B:p flag
+while getopts R:D:r:u:i:t:v:h:d:l:P:f:B:pq flag
 do
     case "${flag}" in
         R) REVISION=$OPTARG;;
@@ -30,6 +30,7 @@ do
            ;;
         h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
         d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
+        q) QUIET="-q";;
         :) exit 1;;
         \?) exit 1;; 
     esac
@@ -66,6 +67,7 @@ docker buildx use $BUILDER
 set -x
 # Build image
 docker buildx build \
+    "$QUIET" \
     -f "$DOCKERFILE" \
     --build-arg REVISION="$REVISION" \
     --build-arg BUILDER_IMAGE="$BUILDER_IMAGE" \

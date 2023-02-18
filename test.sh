@@ -40,7 +40,7 @@ function launch() {
     done
 
     if [ $c -eq $timeout ]; then 
-        docker logs $CONTAINER_NAME > $LOGS_FOLDER/launch-$(date +"%s")
+        docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
         return 1
     fi
 }
@@ -62,6 +62,11 @@ function check_memcached() {
     fi
 }
 
+function clean() {
+    print "Cleaning..."
+    $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
+}
+
 function do_tests() {
     lsdbms=( "SQLite" "MariaDB" "MySQL" )
     stest_cases=( "New instance" "Major update" )
@@ -74,12 +79,13 @@ function do_tests() {
         for test_case in "${!init_funcs[@]}"
         do
             stest_case=${stest_cases[$test_case]}
-            write_env
+            write_env "$1" "$dbms"
             ${init_funcs[$test_case]}
 
             if [ $? -ne 0 ]; then 
                 print "${RED}Initialization failed, pass${NC}"
                 FAILED=1
+                clean
                 continue
             fi
 
@@ -89,6 +95,7 @@ function do_tests() {
             if [ $? -ne 0 ]; then 
                 print "${RED}Launch failed, pass${NC}"
                 FAILED=1
+                clean
                 continue
             fi
 
@@ -102,8 +109,7 @@ function do_tests() {
                 print "${RED}Failed${NC}"
             fi
 
-            print "Cleaning..."
-            $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
+            clean
         done
     done
 }
@@ -111,10 +117,10 @@ function do_tests() {
 function write_env() {
     print "Write .env"
 
-    echo "DBMS=$dbms
+    echo "DBMS=$2
     NOSWAG=1
     NOSWAG_PORT=$PORT
-    SEAFILE_IMAGE=$IMAGE_FQN:$tag
+    SEAFILE_IMAGE=$IMAGE_FQN:$1
     HOST=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
@@ -177,7 +183,7 @@ if [ "$BUILD" = "1" ]
 then
     echo "Build images"
     export NO_ENV=1
-    ./build_image.sh
+    ./build_image.sh -q
 fi
 
 echo "Set up test topology"
@@ -202,7 +208,7 @@ export SEAFILE_ADMIN_PASSWORD=secret
 export LOGS_FOLDER=$ROOT_DIR/logs
 
 sed -i 's/#~//g' compose.seafile.common.yml
-write_env &> /dev/null
+write_env latest 1 &> /dev/null
 $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
 
 echo "Write nginx config"
@@ -220,7 +226,7 @@ do
     if [ "$BUILD" = 1 ]
     then
         echo "Export $platform image to local images"
-        $ROOT_DIR/build_image.sh -t "$tag" -l "$platform"
+        $ROOT_DIR/build_image.sh -q -t "$tag" -l "$platform"
     fi
     
     if [ "$(docker images -qf reference="${IMAGE_FQN}:${tag}")" = "" ]
@@ -228,7 +234,7 @@ do
         echo -e "${RED}Can't find image for ${platform}, pass${NC}"
         FAILED=1
     else
-        do_tests
+        do_tests "$tag"
     fi
 done
 

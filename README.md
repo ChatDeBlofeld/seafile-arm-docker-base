@@ -26,6 +26,7 @@ Options:
                         arm/v7 
                         arm64 
                         amd64
+                        riscv64
     -p              Push the image(s) to the remote registry. Incompatible with -l.
     -R              Image revision
     -f              Set a specific Dockerfile (default: Dockerfile)
@@ -35,9 +36,10 @@ Options:
     -h              Set python requirement file for seahub
     -d              Set python requirement file for seafdav
     -B              Builder image used to build Seafile
-    -r              Registry to which upload the image
-    -u              Repository to which upload the image
-    -i              Image name
+    -r              Registry to which upload the image. Need to be set before -t.
+    -u              Repository to which upload the image. Need to be set before -t.
+    -i              Image name. Need to be set before -t.
+    -q              Quiet mode.
 ```
 
 Example:
