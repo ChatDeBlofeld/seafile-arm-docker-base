@@ -27,5 +27,8 @@ djangosaml2==0.20.0
 # Markdown
 # bleach
 # pylibmc
-django-pylibmc
 # pyOpenSSL
+
+# Memcached stuff
+# pylibmc
+django-pylibmc

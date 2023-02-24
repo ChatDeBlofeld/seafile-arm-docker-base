@@ -28,4 +28,6 @@ cryptography~=36.0.0
 Markdown
 bleach
 
-# TODO: memcached stuff
+# Memcached stuff
+pylibmc
+django-pylibmc

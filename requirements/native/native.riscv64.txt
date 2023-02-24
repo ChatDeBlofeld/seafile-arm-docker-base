@@ -65,3 +65,9 @@ python3-urllib3
 python3-yaml
 # -> importlib-metadata, importlib-resources
 # python3-zipp
+
+# Some other platform specific dependencies
+libopenjp2-7
+libtiff5
+libxcb1
+libfreetype6

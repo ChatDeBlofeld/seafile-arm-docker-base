@@ -10,8 +10,6 @@ The build step uses the great [Seafile for Raspberry PI](https://github.com/haiw
 
 ## Build
 
-> Warning: you'll probably have to deal with the -h/-d options to get something working. [This repository](https://github.com/jobenvil/rpi-build-seafile) can help.
-
 Copy the `.env.example` file to `.env`. Then you can either update the dotenv for your needs or use the command line arguments.
 
 ```
@@ -26,15 +24,12 @@ Options:
                         arm/v7 
                         arm64 
                         amd64
-                        riscv64
     -p              Push the image(s) to the remote registry. Incompatible with -l.
     -R              Image revision
     -f              Set a specific Dockerfile (default: Dockerfile)
     -D              Build directory (default: current directory)
     -P              Override the default platform list. Incompatible with -l.
     -v              Set seafile server version to build
-    -h              Set python requirement file for seahub
-    -d              Set python requirement file for seafdav
     -B              Builder image used to build Seafile
     -r              Registry to which upload the image. Need to be set before -t.
     -u              Repository to which upload the image. Need to be set before -t.

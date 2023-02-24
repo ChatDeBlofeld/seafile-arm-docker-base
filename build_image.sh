@@ -25,11 +25,6 @@ do
         P) MULTIARCH_PLATFORMS=$OPTARG;;
         l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
         v) SEAFILE_SERVER_VERSION=$OPTARG
-           PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
-           PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
-           ;;
-        h) PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
-        d) PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
         q) QUIET="-q";;
         :) exit 1;;
         \?) exit 1;; 
@@ -72,6 +67,4 @@ docker buildx build \
     --build-arg REVISION="$REVISION" \
     --build-arg BUILDER_IMAGE="$BUILDER_IMAGE" \
     --build-arg SEAFILE_SERVER_VERSION="$SEAFILE_SERVER_VERSION" \
-    --build-arg PYTHON_REQUIREMENTS_URL_SEAHUB="$PYTHON_REQUIREMENTS_URL_SEAHUB" \
-    --build-arg PYTHON_REQUIREMENTS_URL_SEAFDAV="$PYTHON_REQUIREMENTS_URL_SEAFDAV" \
     $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"

@@ -52,12 +52,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     libmariadb3 \
     libmemcached11 \
     python3 \
-    # Folowing libs are useful for the armv7 arch only
-    # Since they're not heavy, no need to create separate pipelines atm
-    libopenjp2-7 \
-    libtiff5 \
-    libxcb1 \
-    libfreetype6 \
     && /requirements/install.sh -nl $TARGETPLATFORM \
     && rm -rf /var/lib/apt/lists/*
 
