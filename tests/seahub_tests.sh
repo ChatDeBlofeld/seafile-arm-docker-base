@@ -11,6 +11,22 @@ function print_log() {
     echo "$@" > $LOGS_FOLDER/$LOG_FILE
 }
 
+function wait_for_502() {
+    for i in {1..10}
+    do
+        log=$(curl --no-progress-meter -d "username=$SEAFILE_ADMIN_EMAIL&password=$SEAFILE_ADMIN_PASSWORD" http://$HOST:$PORT/api2/auth-token/ 2>&1)
+        if [ "$(echo $log | grep '502 Bad Gateway')" = "" ]
+        then
+            return
+        fi
+    
+        sleep 1s
+    done
+
+    echo "TOO MUCH BAD GATEWAY"
+    exit 1
+}
+
 function authorization() {
     print "Check authorization"
     log=$(curl --no-progress-meter -d "username=$SEAFILE_ADMIN_EMAIL&password=$SEAFILE_ADMIN_PASSWORD" http://$HOST:$PORT/api2/auth-token/ 2>&1)
@@ -171,6 +187,8 @@ tests=(authorization default_library list_libraries upload_link upload_file down
 LOG_FILE=seahub_logs-$(date +"%s")
 STEP=1
 STEPS=${#tests[@]}
+
+wait_for_502
 
 for test in "${!tests[@]}"
 do
