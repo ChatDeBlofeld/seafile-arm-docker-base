@@ -15,7 +15,6 @@ do
 done
 
 REQUIREMENTS_DIR="/requirements"
-# REQUIREMENTS_DIR="/home/thibaud/Bureau/git/seafile-arm-docker-base/requirements"
 
 if [ $NATIVE ]; then
     grep -vE '^#' "$REQUIREMENTS_DIR/native/native.$TAG.txt" | xargs apt-get install -y

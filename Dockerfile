@@ -38,13 +38,14 @@ COPY custom/db_update_helper.py seafile-server-$SEAFILE_SERVER_VERSION/upgrade/d
 
 RUN chmod -R g+w .
 
-FROM --platform=$TARGETPLATFORM ubuntu:jammy
+# FIXME: pinned ubuntu version due to riscv issue
+FROM --platform=$TARGETPLATFORM ubuntu:jammy-20221130
 
 ARG TARGETPLATFORM
 
 COPY requirements /requirements
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
     sudo \
     tzdata \
     procps \
