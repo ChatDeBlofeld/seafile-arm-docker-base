@@ -1,0 +1,9 @@
+*
+
+# Folders
+!/custom
+!/requirements
+!/scripts
+
+# Files
+!/docker_entrypoint.sh
