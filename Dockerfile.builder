@@ -1,4 +1,4 @@
-FROM --platform=$TARGETPLATFORM ubuntu:jammy
+FROM --platform=$TARGETPLATFORM ubuntu:jammy-20221130
 
 ARG TARGETPLATFORM
 
@@ -19,5 +19,4 @@ RUN ./build.sh -D
 
 # Installing python dependencies, mixing native and pip packages
 COPY requirements /requirements
-
 RUN /requirements/install.sh -pnl $TARGETPLATFORM

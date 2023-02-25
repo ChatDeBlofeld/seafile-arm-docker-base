@@ -10,7 +10,7 @@ then
     set +a
 fi
 
-while getopts R:D:r:u:i:t:v:h:d:l:P:f:B:pq flag
+while getopts R:D:r:u:i:t:v:l:P:f:B:pq flag
 do
     case "${flag}" in
         R) REVISION=$OPTARG;;
@@ -24,7 +24,7 @@ do
         p) OUTPUT="--push";;
         P) MULTIARCH_PLATFORMS=$OPTARG;;
         l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
-        v) SEAFILE_SERVER_VERSION=$OPTARG
+        v) SEAFILE_SERVER_VERSION=$OPTARG;;
         q) QUIET="-q";;
         :) exit 1;;
         \?) exit 1;; 
