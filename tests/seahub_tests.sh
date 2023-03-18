@@ -126,7 +126,7 @@ function download_file() {
 function ui_auth() {
     print "Check login with ui form"
     csrf=$(curl -s -c cookies http://$HOST:$PORT/accounts/login/ | sed -n 's/.* name=\"csrfmiddlewaretoken\" value=\"\([^"]*\).*/\1/p')
-    log=$(curl -is -b cookies -d "csrfmiddlewaretoken=$csrf&login=$SEAFILE_ADMIN_EMAIL&password=$SEAFILE_ADMIN_PASSWORD" http://$HOST:$PORT/accounts/login/ 2>&1)
+    log=$(curl -is -c cookies -b cookies -d "csrfmiddlewaretoken=$csrf&login=$SEAFILE_ADMIN_EMAIL&password=$SEAFILE_ADMIN_PASSWORD" http://$HOST:$PORT/accounts/login/ 2>&1)
     success=$(echo "$log" | grep 302 2> /dev/null)
 
     if [[ "$success" == "" ]]
@@ -134,6 +134,19 @@ function ui_auth() {
         print_log "$csrf"
         print_log "$log"
         echo "Failed to log in with ui form"
+        exit 1
+    fi
+}
+
+function ui_home_page() {
+    # Not reliable at all but can detect some errors 500 (-> "server hiccup")
+    print "Check ui home page"
+    log=$(curl -is -b cookies http://$HOST:$PORT 2>&1)
+
+    if [[ "$(echo $log | grep "$SEAFILE_SERVER_VERSION")" == "" ]]
+    then
+        print_log "$log"
+        echo "Failed to load ui home page"
         exit 1
     fi
 }
@@ -183,7 +196,7 @@ function avatar_folder() {
 
 echo "-------- SEAHUB TESTS --------"
 
-tests=(authorization default_library list_libraries upload_link upload_file download_link download_file ui_auth media_folder avatar_upload avatar_folder)
+tests=(authorization default_library list_libraries upload_link upload_file download_link download_file ui_auth ui_home_page media_folder avatar_upload avatar_folder)
 LOG_FILE=seahub_logs-$(date +"%s")
 STEP=1
 STEPS=${#tests[@]}
