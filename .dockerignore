@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# Allow files and directories
+!/custom
+!/requirements
+!/scripts
+!/build.sh
+!/docker_entrypoint.sh

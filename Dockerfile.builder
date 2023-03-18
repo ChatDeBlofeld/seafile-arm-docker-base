@@ -10,11 +10,8 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
     # needed for pillow to properly display captcha (and something else?)
     libfreetype-dev
 
-# Retrieve seafile build script
-RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
-RUN chmod u+x build.sh
-
 # Install build dependencies
+COPY ./build.sh ./build.sh
 RUN ./build.sh -D
 
 # Installing python dependencies, mixing native and pip packages
