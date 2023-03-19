@@ -125,11 +125,12 @@ I you want a MySQL/MariaDB deployment, you'll have to/can deal with some additio
 
 In addition of the basic configuration described above, you can tune your configuration (as described in the [Seafile manual](https://manual.seafile.com/)) using the optional parameters below (at **initialization only**).
 
-You can of course edit the various config files yourself but those configurations are not tested and may or may not work, consult the open issues to know if there are known problems about what you want to use.
+You can of course edit the various config files yourself but all configurations are not tested and may or may not work, consult the open issues to know if there are known problems about what you want to use.
 
 | Parameter | Description |
 |:-|:-|
 |`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
+|`WEBDAV`| (0: webdav disabled\|1: webdav enabled) Enable [webdav](https://manual.seafile.com/extension/webdav/) on port `8080` for location `/seafdav`.|
 
 ### Garbage collection
 
