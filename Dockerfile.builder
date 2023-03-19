@@ -8,6 +8,8 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
     sudo \
     libmemcached-dev \
     # needed for pillow to properly display captcha (and something else?)
+    # TODO: not sure if still needed since Pillow isn't compiled anymore
+    # (either fetched as wheel or binary with apt)
     libfreetype-dev
 
 # Install build dependencies
