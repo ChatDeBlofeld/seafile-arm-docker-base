@@ -85,6 +85,17 @@ function check_memcached() {
     fi
 }
 
+function check_webdav() {
+    if [[ $failed -ne 0 || $WEBDAV_MIN_VERSION -gt $MIN_VERSION ]]; then
+        return 0
+    fi
+
+    echo "-------- WEBDAV TESTS --------"
+    flag=0
+    $ROOT_DIR/tests/webdav_tests.sh || flag=1
+    return $flag
+}
+
 function clean() {
     print "Cleaning..."
     $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
@@ -125,6 +136,7 @@ function do_tests() {
             print "Launch tests"
             failed=0
             $ROOT_DIR/tests/seahub_tests.sh || failed=1
+            check_webdav || failed=1
             check_memcached || failed=1
             # Has to be the last check since it stops the server
             check_gc || failed=1
@@ -160,6 +172,7 @@ function write_env() {
     SEAFILE_DATA_DIR=data
     SEAFILE_SEAHUB_DIR=seahub
     DATABASE_DIR=db
+    WEBDAV=1
     MEMCACHED_HOST=memcached:11211" > $TOPOLOGY_DIR/.env
 }
 

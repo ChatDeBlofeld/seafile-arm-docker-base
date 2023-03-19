@@ -11,6 +11,7 @@ function print_log() {
     echo "$@" > $LOGS_FOLDER/$LOG_FILE
 }
 
+# FIXME: implies seahub tests are always the first, should probably be in test.sh
 function wait_for_502() {
     for i in {1..10}
     do
