@@ -130,7 +130,7 @@ You can of course edit the various config files yourself but all configurations 
 | Parameter | Description |
 |:-|:-|
 |`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
-|`WEBDAV`| (0: webdav disabled\|1: webdav enabled) Enable [webdav](https://manual.seafile.com/extension/webdav/) on port `8080` for location `/seafdav`.|
+|`WEBDAV`| Set to `1` to enable [webdav](https://manual.seafile.com/extension/webdav/) on port `8080` for location `/seafdav`.|
 
 ### Garbage collection
 
