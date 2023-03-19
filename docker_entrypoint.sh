@@ -97,6 +97,7 @@ function gc() {
 
     if [[ $? -ne 0 ]]; then
         print "${RED}Failed${NC}"
+        exit 1
     else
         print "${GREEN}Success${NC}"
     fi
