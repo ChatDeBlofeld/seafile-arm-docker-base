@@ -6,6 +6,7 @@ CONFIG_DIR="/shared/conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
+WEBDAV_CONFIG_FILE="$CONFIG_DIR/seafdav.conf"
 
 function writeCcnetConfig() {
     if [ "$HTTPS_SUFFIX" ]
@@ -36,6 +37,15 @@ function writeSeahubConfiguration() {
     fi
 }
 
+function writeWebdavConfiguration() {
+    echo "[WEBDAV]"                 >  $WEBDAV_CONFIG_FILE
+    echo "enabled = true"           >> $WEBDAV_CONFIG_FILE
+    echo "host = seafile"           >> $WEBDAV_CONFIG_FILE
+    echo "port = 8080"              >> $WEBDAV_CONFIG_FILE
+    echo "fastcgi = false"          >> $WEBDAV_CONFIG_FILE
+    echo "share_name = /seafdav"    >> $WEBDAV_CONFIG_FILE
+}
+
 cd /opt/seafile
 
 echo "Writing ccnet configuration"
@@ -46,3 +56,8 @@ writeGunicornSettings
 
 echo "Writing seahub configuration"
 writeSeahubConfiguration
+
+if [ "$WEBDAV" = "1" ]; then
+    echo "Writing webdav configuration"
+    writeWebdavConfiguration
+fi
