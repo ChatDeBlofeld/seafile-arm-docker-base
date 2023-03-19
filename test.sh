@@ -50,6 +50,24 @@ function launch() {
     fi
 }
 
+function check_gc() {
+    # Depends only on current image
+    if [[ $failed -ne 0 || $GC_MIN_VERSION -gt $MAJOR_VERSION ]]; then
+        return 0
+    fi
+
+    echo "----------- GC TEST ----------"
+    echo "Check if garbage collection works"
+    $TOPOLOGY_DIR/compose.sh stop seafile &> /dev/null
+    log=$($TOPOLOGY_DIR/compose.sh run --rm seafile gc 2>&1 || echo failed_flag)
+
+    if [ "$(echo -e $log | grep 'failed_flag')" != "" ]; then
+        echo "Garbage collection failed"
+        echo $log > $LOGS_FOLDER/gc-$(date +"%s")
+        return 1
+    fi
+}
+
 function check_memcached() {
     if [[ $failed -ne 0 || $MEMCACHED_MIN_VERSION -gt $MIN_VERSION ]]; then
         return 0
@@ -108,6 +126,8 @@ function do_tests() {
             failed=0
             $ROOT_DIR/tests/seahub_tests.sh || failed=1
             check_memcached || failed=1
+            # Has to be the last check since it stops the server
+            check_gc || failed=1
 
             if [ $failed -ne 0 ]; then
                 FAILED=1
