@@ -6,4 +6,5 @@
 !/scripts
 
 # Files
+!/build.sh
 !/docker_entrypoint.sh

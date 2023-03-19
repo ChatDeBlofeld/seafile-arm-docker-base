@@ -1,33 +1,23 @@
-Django==3.2.14
-# future
-captcha
-django-statici18n
-django-webpack_loader==0.7.0
-gunicorn
-mysqlclient
-django-picklefield==2.1.1
-# openpyxl
-# qrcode
+Django==3.2.16
+django-statici18n==2.3.*
+django_webpack_loader==1.7.*
+django_picklefield==3.1
+django_formtools==2.4
+django_simple_captcha==0.5.*
+djangosaml2==1.5.*
+djangorestframework==3.14.*
+python-dateutil==2.8.*
+python-cas==1.6.*
+pysaml2==7.2.*
+gunicorn==20.1.*
+mysqlclient==2.1.*
+chardet==5.1.*
+captcha==0.4
+openpyxl==3.0.*
+
+# Some transitive dependencies
 django-appconf
-django-formtools==2.3
 django-ranged-response
-django-simple-captcha
-djangorestframework==3.11.1
-python-dateutil
-# requests
-# pillow
-# pyjwt==2.1.*
-# pycryptodome==3.12.0
-# requests_oauthlib
-chardet
-python-cas
-djangosaml2==0.20.0
-# pysaml2==6.5.1
-# cffi==1.14.6
-# Markdown
-# bleach
-# pylibmc
-# pyOpenSSL
 
 # Memcached stuff
 # pylibmc

@@ -21,7 +21,7 @@ function init_update() {
         return 1
     fi
 
-    sed -i "s#SEAFILE_IMAGE=.*#SEAFILE_IMAGE=${IMAGE_FQN}:${platform}#" $TOPOLOGY_DIR/.env
+    sed -i "s#SEAFILE_IMAGE=.*#SEAFILE_IMAGE=${IMAGE_FQN}:${1}#" $TOPOLOGY_DIR/.env
 }
 
 function init_new_instance(){
@@ -31,6 +31,11 @@ function init_new_instance(){
 
 function launch() {
     $TOPOLOGY_DIR/compose.sh up -d &> /dev/null
+    if [ $? -ne 0 ]; then
+        $TOPOLOGY_DIR/compose.sh up -d &> $LOGS_FOLDER/launch-$(date +"%s")
+        return 1
+    fi
+
     timeout=${timeout:=180}
     c=1
     while [[ "$(docker logs $CONTAINER_NAME |& grep -Pc '^Done\.$')" != "2" && $c -lt $timeout ]]
@@ -80,7 +85,7 @@ function do_tests() {
         do
             stest_case=${stest_cases[$test_case]}
             write_env "$1" "$dbms"
-            ${init_funcs[$test_case]}
+            ${init_funcs[$test_case]} "$1"
 
             if [ $? -ne 0 ]; then 
                 print "${RED}Initialization failed, pass${NC}"
@@ -106,6 +111,7 @@ function do_tests() {
 
             if [ $failed -ne 0 ]; then
                 FAILED=1
+                docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
                 print "${RED}Failed${NC}"
             fi
 
@@ -183,7 +189,7 @@ if [ "$BUILD" = "1" ]
 then
     echo "Build images"
     export NO_ENV=1
-    ./build_image.sh -q
+    ./build_image.sh
 fi
 
 echo "Set up test topology"
@@ -226,7 +232,7 @@ do
     if [ "$BUILD" = 1 ]
     then
         echo "Export $platform image to local images"
-        $ROOT_DIR/build_image.sh -q -t "$tag" -l "$platform"
+        $ROOT_DIR/build_image.sh -t "$tag" -l "$platform"
     fi
     
     if [ "$(docker images -qf reference="${IMAGE_FQN}:${tag}")" = "" ]

@@ -8,13 +8,12 @@ RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
     sudo \
     libmemcached-dev \
     # needed for pillow to properly display captcha (and something else?)
+    # TODO: not sure if still needed since Pillow isn't compiled anymore
+    # (either fetched as wheel or binary with apt)
     libfreetype-dev
 
-# Retrieve seafile build script
-RUN wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
-RUN chmod u+x build.sh
-
 # Install build dependencies
+COPY ./build.sh ./build.sh
 RUN ./build.sh -D
 
 # Installing python dependencies, mixing native and pip packages
