@@ -3,7 +3,7 @@
 set -Eeo pipefail
 
 function print() {
-    echo "$(date -Iseconds) [Update] $*"
+    echo "$(date +"%F %T") [Update] $*"
 }
 
 function update_db() {

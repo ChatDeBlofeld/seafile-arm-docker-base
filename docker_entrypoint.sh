@@ -2,8 +2,12 @@
 
 set -Eeo pipefail
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 function print() {
-    echo "$(date -Iseconds) [Entrypoint] $*"
+    echo -e "$(date +"%F %T") [Entrypoint] $*"
 }
 
 function quit() {
@@ -54,6 +58,50 @@ function rightsManagement() {
     done
 }
 
+function init() {
+    if [ ! -f "/shared/conf/ccnet.conf" ]
+    then
+        print "No config found. Running init script"
+        su seafile -pPc "/home/seafile/init.sh"
+
+        if [ $? != 0 ]
+        then
+            print "${RED}Init failed${NC}"
+            exit 1
+        fi
+    fi
+}
+
+function launch() {
+    init
+    /home/seafile/bind_volume.sh
+
+    print "Running launch script"
+    su seafile -pc "/home/seafile/launch.sh"
+
+    if [ $? != 0 ]
+    then
+        print "${RED}Launch failed${NC}"
+        exit 1
+    fi
+
+    print "Waiting for termination"
+    tail -f /dev/null & wait
+}
+
+function gc() {
+    /home/seafile/bind_volume.sh
+
+    print "Running garbage collection"
+    /opt/seafile/seafile-server-latest/seaf-gc.sh $@
+
+    if [[ $? -ne 0 ]]; then
+        print "${RED}Failed${NC}"
+    else
+        print "${GREEN}Success${NC}"
+    fi
+}
+
 # Quit when receiving some signals
 trap quit SIGTERM
 trap quit SIGINT
@@ -68,26 +116,11 @@ fi
 
 chown seafile:seafile /shared
 
-if [ ! -f "/shared/conf/ccnet.conf" ]
-then
-    print "No config found. Running init script"
-    su seafile -pPc "/home/seafile/init.sh"
+case "$1" in
+    launch) launch;;
+    gc) gc ${@:2};;
+    shell) su seafile;;
+    *) $1;;
+esac
 
-    if [ $? != 0 ]
-    then
-        print "Init failed"
-        exit 1
-    fi
-fi
 
-print "Running launch script"
-su seafile -pc "/home/seafile/launch.sh"
-
-if [ $? != 0 ]
-then
-    print "Launch failed"
-    exit 1
-fi
-
-print "Waiting for termination"
-tail -f /dev/null & wait

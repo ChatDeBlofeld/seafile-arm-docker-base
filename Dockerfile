@@ -80,4 +80,5 @@ ENV REVISION $REVISION
 
 EXPOSE 8000 8080 8082 8083
 
-CMD ["/docker_entrypoint.sh"]
+ENTRYPOINT ["/docker_entrypoint.sh"]
+CMD ["launch"]

@@ -3,7 +3,7 @@
 set -Eeo pipefail
 
 function print() {
-    echo "$(date -Iseconds) [Init] $*"
+    echo "$(date +"%F %T") [Init] $*"
 }
 
 function detectAutoMode() {
