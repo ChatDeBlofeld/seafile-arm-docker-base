@@ -131,6 +131,24 @@ You can of course edit the various config files yourself but those configuration
 |:-|:-|
 |`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
 
+### Garbage collection
+
+Garbage collection is not integrated (and won't be anytime soon) but can easily be triggered with a cron job on the host. See:
+
+```bash
+$ docker stop <seafile container>
+$ docker run --rm -v /path/to/seafile/data/:/shared -e PUID=<PUID> -e PGID=<PGID> franchetti/seafile-arm gc
+$ docker start <seafile container>
+```
+
+Obviously you probably want a compose topology wich makes things even easier:
+
+```bash
+$ docker compose stop <seafile service>
+$ docker compose run --rm <seafile service> gc
+$ docker compose start <seafile service>
+```
+
 ### Manual setup 
 
 >Warning: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
