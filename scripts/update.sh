@@ -39,6 +39,11 @@ if [ "$CURRENT_REVISION" -lt 2 ]; then
     echo "SERVICE_URL = '${service_url}'">>${SEAFILE_CENTRAL_CONF_DIR}/seahub_settings.py
 fi
 
+if [ "$CURRENT_REVISION" -lt 13 ]; then
+    print "Update database to Seafile 10 scheme"
+    update_db 10.0.0
+fi
+
 
 echo "$REVISION" > "/shared/conf/revision"
 print "Done!"
