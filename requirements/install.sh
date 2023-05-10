@@ -16,15 +16,19 @@ done
 
 REQUIREMENTS_DIR="/requirements"
 
-if [ $NATIVE ]; then
-    grep -vE '^#' "$REQUIREMENTS_DIR/native/native.$TAG.txt" | xargs apt-get install -y
+if [[ -f "$REQUIREMENTS_DIR/native/$TAG.txt" && $NATIVE ]]; then
+    grep -vE '^#' "$REQUIREMENTS_DIR/native/$TAG.txt" | xargs apt-get install -y
 fi
 
 if [ $PIP ]; then
     mkdir -p /haiwen-build/seahub_thirdparty
-    python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart/seafdav.$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade
-    python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart/seahub.$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade
-    python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart_no_deps/seafdav.$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade --no-deps
-    python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart_no_deps/seahub.$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade --no-deps
-    rm -rf $(find /haiwen-build/seahub_thirdparty -name "__pycache__")
+    if [ -f "$REQUIREMENTS_DIR/thirdpart/$TAG.txt" ]; then 
+        python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart/$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade
+    fi
+
+    if [ -f "$REQUIREMENTS_DIR/thirdpart_no_deps/$TAG.txt" ]; then 
+        python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart_no_deps/$TAG.txt" --target /haiwen-build/seahub_thirdparty --no-cache --upgrade --no-deps
+    fi
+
+    # rm -rf $(find /haiwen-build/seahub_thirdparty -name "__pycache__")
 fi

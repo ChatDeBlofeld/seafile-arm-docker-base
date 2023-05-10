@@ -18,4 +18,4 @@ RUN ./build.sh -D
 
 # Installing python dependencies, mixing native and pip packages
 COPY requirements /requirements
-RUN /requirements/install.sh -pnl $TARGETPLATFORM
+RUN /requirements/install.sh -nl $TARGETPLATFORM

@@ -4,6 +4,7 @@
 !/custom
 !/requirements
 !/scripts
+!/seafile
 
 # Files
 !/build.sh

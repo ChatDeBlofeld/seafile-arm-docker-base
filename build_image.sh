@@ -10,7 +10,7 @@ then
     set +a
 fi
 
-while getopts R:D:r:u:i:t:v:l:P:f:B:pq flag
+while getopts R:D:r:u:i:t:v:l:P:f:pq flag
 do
     case "${flag}" in
         R) REVISION=$OPTARG;;
@@ -19,7 +19,6 @@ do
         r) REGISTRY="$OPTARG/";;
         u) REPOSITORY=$OPTARG;;
         i) IMAGE=$OPTARG;;
-        B) BUILDER_IMAGE=$OPTARG;;
         t) TAGS="$TAGS -t $REGISTRY$REPOSITORY/$IMAGE:$OPTARG";;
         p) OUTPUT="--push";;
         P) MULTIARCH_PLATFORMS=$OPTARG;;
@@ -72,6 +71,5 @@ docker buildx build \
     $QUIET \
     -f "$DOCKERFILE" \
     --build-arg REVISION="$REVISION" \
-    --build-arg BUILDER_IMAGE="$BUILDER_IMAGE" \
     --build-arg SEAFILE_SERVER_VERSION="$SEAFILE_SERVER_VERSION" \
     $OUTPUT --platform "$MULTIARCH_PLATFORMS" $TAGS "$DOCKERFILE_DIR"
