@@ -8,44 +8,6 @@ This repository is part of [a bigger project](https://github.com/ChatDeBlofeld/s
 
 The build step uses the great [Seafile for Raspberry PI](https://github.com/haiwen/seafile-rpi) build script.
 
-## Build
-
-Copy the `.env.example` file to `.env`. Then you can either update the dotenv for your needs or use the command line arguments.
-
-```
-build_image.sh [OPTIONS]
-
-Command line arguments take precedence over settings defined in the .env file
-
-Options:
-    -t              Add a tag. Can be used several times
-    -l <platform>   Load to the local images. One <platform> at time only.
-                    <platform> working choices can be: 
-                        arm/v7 
-                        arm64 
-                        amd64
-    -p              Push the image(s) to the remote registry. Incompatible with -l.
-    -R              Image revision
-    -f              Set a specific Dockerfile (default: Dockerfile)
-    -D              Build directory (default: current directory)
-    -P              Override the default platform list. Incompatible with -l.
-    -v              Set seafile server version to build
-    -B              Builder image used to build Seafile
-    -r              Registry to which upload the image. Need to be set before -t.
-    -u              Repository to which upload the image. Need to be set before -t.
-    -i              Image name. Need to be set before -t.
-    -q              Quiet mode.
-```
-
-Example:
-
-```Bash
-$ ./build_image.sh -t 8 -t latest -l amd64
-```
-
-### Builder
-
-Image used to cache build dependencies in Dockerfile first stage can be built using the `Dockerfile.builder` file with the `-f` option.
 
 ## Run
 
@@ -189,3 +151,88 @@ volume_root
 ## Miscellaneous
 
 >Performance hint: for few users, decrease the number of workers in `gunicorn.conf.py` for lower RAM usage.
+
+## Build
+
+### (Optional) Local registry
+
+Set up a local registry to cache images, like the builder image. Note that since `docker buildx build` command is executed in a container, the buildx container has to access the registry container (here using a common network `registry`). Host of the registry will be `localhost` on the host and `registry` in a buildx environment. 
+
+```bash
+$ docker network create registry
+$ docker run -d --name registry -p 5000:5000 --network registry registry:2
+$ docker buildx create --name test --driver-opt network=registry
+```
+
+### Dotenv
+
+Copy the `.env.example` file to `.env`. Then you can either update the dotenv for your needs or use the command line arguments.
+
+### Builder
+
+Build and push builder to local registry:
+
+```bash
+$ ./build_image.sh -f Dockerfile.builder -r registry:5000 -t builder -p
+```
+
+See below for all options of the `build_image.sh` script.
+
+### Seafile
+
+Build all and export:
+
+```bash
+$ ./build_server.sh -ATe
+```
+
+```
+build_server.sh [OPTIONS]
+
+Command line arguments take precedence over settings defined in the .env file
+
+
+Options:
+    -P              Override the default platform list
+    -v              Set seafile server version to build
+    -B              Builder image used to build Seafile
+    -o              Output dir for builds (default: ./seafile)
+    -c              Cache dir (default: ./cache)
+    -e              Export cached builds to output dir
+    -1-9            Build selected seafile parts, see build script documentation
+    -A              Build all parts
+    -T              Build thirdpart dependencies, this does NOT use the same option in the build script.
+```
+
+### Image
+
+Build and export to docker client for platform `amd64` with tags `8` and `latest` :
+
+```Bash
+$ ./build_image.sh -t 8 -t latest -l amd64
+```
+
+```
+build_image.sh [OPTIONS]
+
+Command line arguments take precedence over settings defined in the .env file
+
+Options:
+    -t              Add a tag. Can be used several times
+    -l <platform>   Load to the local images. One <platform> at time only.
+                    <platform> working choices can be: 
+                        arm/v7 
+                        arm64 
+                        amd64
+                        riscv64
+    -p              Push the image(s) to the remote registry. Incompatible with -l.
+    -R              Image revision
+    -f              Set a specific Dockerfile (default: Dockerfile)
+    -D              Build directory (default: current directory)
+    -P              Override the default platform list. Incompatible with -l.
+    -v              Set seafile server version to build
+    -r              Registry to which upload the image. Need to be set before -t.
+    -u              Repository to which upload the image. Need to be set before -t.
+    -i              Image name. Need to be set before -t.
+    -q              Quiet mode.
+```
