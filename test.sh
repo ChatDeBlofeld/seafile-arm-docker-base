@@ -85,6 +85,24 @@ function check_memcached() {
     fi
 }
 
+function check_notification_server() {
+    if [[ $dbms -eq 0 || $failed -ne 0 || $NOTIFICATION_SERVER_MIN_VERSION -gt $MIN_VERSION ]]; then
+        return 0
+    fi
+
+    echo "-- NOTIFICATION SERVER TEST --"
+    echo "Check if notification server is configured correctly"
+    log=$(curl --no-progress-meter http://$HOST:$PORT/notification/ping/ 2>&1)
+    pong=$(echo "$log" | jq -r '.ret' 2> /dev/null)
+
+    if [[ "$pong" != "pong" ]]
+    then
+        echo "Failed to ping notification server"
+        echo $log > $LOGS_FOLDER/notification_server_logs-$(date +"%s")
+        return 1
+    fi
+}
+
 function check_webdav() {
     if [[ $failed -ne 0 || $WEBDAV_MIN_VERSION -gt $MIN_VERSION ]]; then
         return 0
@@ -138,6 +156,7 @@ function do_tests() {
             $ROOT_DIR/tests/seahub_tests.sh || failed=1
             check_webdav || failed=1
             check_memcached || failed=1
+            check_notification_server || failed=1
             # Has to be the last check since it stops the server
             check_gc || failed=1
 
@@ -173,6 +192,7 @@ function write_env() {
     SEAFILE_SEAHUB_DIR=seahub
     DATABASE_DIR=db
     WEBDAV=1
+    NOTIFICATION_SERVER=1
     MEMCACHED_HOST=memcached:11211" > $TOPOLOGY_DIR/.env
 }
 

@@ -93,6 +93,7 @@ You can of course edit the various config files yourself but all configurations 
 |:-|:-|
 |`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
 |`WEBDAV`| Set to `1` to enable [webdav](https://manual.seafile.com/extension/webdav/) on port `8080` for location `/seafdav`.|
+|`NOTIFICATION_SERVER`| Set to `1` to enable [notification server](https://manual.seafile.com/config/seafile-conf/#notification-server-configuration) on port `8083`.|
 
 ### Garbage collection
 

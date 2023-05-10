@@ -6,6 +6,7 @@ CONFIG_DIR="/shared/conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
+SEAFILE_CONFIG_FILE="$CONFIG_DIR/seafile.conf"
 WEBDAV_CONFIG_FILE="$CONFIG_DIR/seafdav.conf"
 
 function writeCcnetConfig() {
@@ -37,6 +38,38 @@ function writeSeahubConfiguration() {
     fi
 }
 
+function writeSeafileConfiguration() {
+    if [ "$NOTIFICATION_SERVER" = "1" ]
+    then
+
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^(;|#).*$ ]]; then
+                echo "$line" >> "$SEAFILE_CONFIG_FILE.new"
+                continue
+            elif [[ "$line" =~ ^\[.*\]$ ]]; then
+                section=$(echo $line | sed -n 's#\[\(.*\)\]#\1#p')
+            else
+                key=$(echo $line | cut -d= -f 1 | xargs)
+            fi
+
+            if [ "$section" = "notification" ]; then
+                if [ "$key" = "enabled" ]; then
+                    echo "enabled = true" >> "$SEAFILE_CONFIG_FILE.new"
+                    continue
+                elif [ "$key" = "host" ]; then
+                    echo "host = 0.0.0.0" >> "$SEAFILE_CONFIG_FILE.new"
+                    continue
+                fi
+            fi
+                
+            echo "$line" >> "$SEAFILE_CONFIG_FILE.new"
+        done < "$SEAFILE_CONFIG_FILE"
+
+        rm "$SEAFILE_CONFIG_FILE"
+        mv "$SEAFILE_CONFIG_FILE.new" "$SEAFILE_CONFIG_FILE"
+    fi
+}
+
 function writeWebdavConfiguration() {
     echo "[WEBDAV]"                 >  $WEBDAV_CONFIG_FILE
     echo "enabled = true"           >> $WEBDAV_CONFIG_FILE
@@ -56,6 +89,9 @@ writeGunicornSettings
 
 echo "Writing seahub configuration"
 writeSeahubConfiguration
+
+echo "Writing seafile configuration"
+writeSeafileConfiguration
 
 if [ "$WEBDAV" = "1" ]; then
     echo "Writing webdav configuration"
