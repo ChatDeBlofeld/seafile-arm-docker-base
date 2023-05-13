@@ -171,6 +171,12 @@ Copy the `.env.example` file to `.env`. Then you can either update the dotenv fo
 
 ### Builder
 
+Download the build script:
+
+```bash
+$ wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
+```
+
 Build and push builder to local registry:
 
 ```bash
