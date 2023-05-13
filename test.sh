@@ -36,7 +36,7 @@ function launch() {
         return 1
     fi
 
-    timeout=${timeout:=180}
+    timeout=${timeout:=300}
     c=1
     while [[ "$(docker logs $CONTAINER_NAME |& grep -Pc '^Done\.$')" != "2" && $c -lt $timeout ]]
     do
