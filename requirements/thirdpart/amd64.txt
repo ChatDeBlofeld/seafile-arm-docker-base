@@ -45,5 +45,4 @@ PyYAML~=6.0
 six~=1.13
 lxml
 sqlalchemy
-# input from @wsirhc see https://github.com/haiwen/seafile-rpi/issues/113
 markupsafe==2.0.1
