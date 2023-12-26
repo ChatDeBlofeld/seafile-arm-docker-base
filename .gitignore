@@ -4,3 +4,4 @@ build.sh
 build-server.py.patch
 seafile
 cache
+packages

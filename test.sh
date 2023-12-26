@@ -253,8 +253,8 @@ cd $ROOT_DIR
 rm -rf $TOPOLOGY_DIR
 git clone https://github.com/ChatDeBlofeld/seafile-arm-docker $TOPOLOGY &> /dev/null
 CONTAINER_NAME=$TOPOLOGY-seafile-1
-rm -rf logs
-mkdir logs
+rm -rf logs/test
+mkdir -p logs/test
 cd $TOPOLOGY_DIR
 git checkout $BRANCH
 
@@ -264,7 +264,7 @@ export HOST=127.0.0.1
 export PORT=44444
 export SEAFILE_ADMIN_EMAIL=you@your.email
 export SEAFILE_ADMIN_PASSWORD=secret
-export LOGS_FOLDER=$ROOT_DIR/logs
+export LOGS_FOLDER=$ROOT_DIR/logs/test
 
 sed -i 's/#~//g' compose.seafile.common.yml
 write_env latest 1 &> /dev/null

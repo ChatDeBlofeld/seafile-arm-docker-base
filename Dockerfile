@@ -13,6 +13,7 @@ RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-g
     libmariadb3 \
     libmemcached11 \
     python3 \
+    python3-pkg-resources \
     && /requirements/install.sh -nl $TARGETPLATFORM \
     && rm -rf /var/lib/apt/lists/*
 

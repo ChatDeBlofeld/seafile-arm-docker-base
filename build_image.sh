@@ -58,13 +58,6 @@ docker buildx use $BUILDER
 #   sleep 2
 # fi
 
-# Download build script
-if [ ! -f "$ROOT_DIR/build.sh" ]
-then
-    wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh -O "$ROOT_DIR/build.sh"
-    chmod u+x "$ROOT_DIR/build.sh"
-fi
-
 set -x
 # Build image
 docker buildx build \
