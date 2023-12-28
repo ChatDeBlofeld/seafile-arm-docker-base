@@ -1,4 +1,5 @@
 cffi==1.15.1
+cryptography
 lxml
 markupsafe==2.0.1
 mysqlclient==2.1.*
