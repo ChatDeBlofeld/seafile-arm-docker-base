@@ -54,7 +54,7 @@ function download_file() {
 }
 
 tests=(access upload_file download_file)
-LOG_FILE=webdav-$(date +"%s")
+LOG_FILE=$(date +"%s")-webdav.log
 STEP=1
 STEPS=${#tests[@]}
 

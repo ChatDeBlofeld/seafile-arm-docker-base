@@ -198,7 +198,7 @@ function avatar_folder() {
 echo "-------- SEAHUB TESTS --------"
 
 tests=(authorization default_library list_libraries upload_link upload_file download_link download_file ui_auth ui_home_page media_folder avatar_upload avatar_folder)
-LOG_FILE=seahub_logs-$(date +"%s")
+LOG_FILE=$(date +"%s")-seahub.log
 STEP=1
 STEPS=${#tests[@]}
 

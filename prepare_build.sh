@@ -52,6 +52,7 @@ if [ ! -d "$LOGS_DIR" ]; then
 fi
 
 # Currently sequential cause of deadlocks, need to dig
+# (not anymore but not tested)
 IFS=',' read -r -a PLATFORMS <<< "$MULTIARCH_PLATFORMS"
 ids=()
 
@@ -60,20 +61,17 @@ do
     arch="$(sed 's#linux/##' <<< $platform)"
     tag="$(sed 's#/##' <<< $arch)"
 
+    # Remove old files
     rm -rf "$OUTPUT_DIR/$platform"
     mkdir -p "$OUTPUT_DIR/$platform"
     base_dir="$OUTPUT_DIR/$platform/seafile-server-$SEAFILE_SERVER_VERSION"
 
+    # Prepare files from archive
     tar -xzf $PACKAGES_DIR/$tag/seafile-server-$SEAFILE_SERVER_VERSION-*.tar.gz -C "$OUTPUT_DIR/$platform"
     mv "$base_dir/seahub/media" "$OUTPUT_DIR/$platform/"
 
-    rm -f "$base_dir/setup-seafile-mysql.py"
-    rm -f "$base_dir/upgrade/db_update_helper.py"
-    cp "$ROOT_DIR/custom/setup-seafile-mysql.py" "$base_dir/setup-seafile-mysql.py"
-    cp "$ROOT_DIR/custom/db_update_helper.py" "$base_dir/upgrade/db_update_helper.py"
-
+    # Install needed dependencies
     cmd="/requirements/install.sh -pl $platform && chown -R $(id -u):$(id -g) /seafile/seahub/thirdpart"
-
     set -x
     id=($(docker run -d --rm \
         --platform $platform \
@@ -83,14 +81,14 @@ do
         $BUILDER_IMAGE /bin/bash -c "$cmd"))
     set +x
 
-    ids+=id
+    ids+=($id)
     docker logs -f $id &> "$LOGS_DIR/$tag.log" &
 done
 
 function quit() {
     for id in "${ids[@]}"
     do
-        docker stop id
+        docker stop $id
     done
     exit
 }

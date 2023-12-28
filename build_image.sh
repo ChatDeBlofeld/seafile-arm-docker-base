@@ -10,9 +10,10 @@ then
     set +a
 fi
 
-while getopts R:D:r:u:i:t:v:l:P:f:pq flag
+while getopts BR:D:r:u:i:t:v:l:P:f:pq flag
 do
     case "${flag}" in
+        B) PREPARE=true;;
         R) REVISION=$OPTARG;;
         D) DOCKERFILE_DIR=$OPTARG;;
         f) DOCKERFILE="$OPTARG";;
@@ -57,6 +58,10 @@ docker buildx use $BUILDER
 #   docker restart $(docker ps -qf name=$BUILDER)
 #   sleep 2
 # fi
+
+if [ $PREPARE ]; then
+    "$ROOT_DIR/prepare_build.sh"
+fi
 
 set -x
 # Build image

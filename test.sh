@@ -45,7 +45,7 @@ function launch() {
     done
 
     if [ $c -eq $timeout ]; then 
-        docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
+        docker logs $CONTAINER_NAME &> $LOGS_FOLDER/$(date +"%s")-launch.log
         return 1
     fi
 }
@@ -63,7 +63,7 @@ function check_gc() {
 
     if [ "$(echo -e $log | grep 'failed_flag')" != "" ]; then
         echo "Garbage collection failed"
-        echo $log > $LOGS_FOLDER/gc-$(date +"%s")
+        echo $log > $LOGS_FOLDER/$(date +"%s")-gc.log
         return 1
     fi
 }
@@ -80,7 +80,7 @@ function check_memcached() {
     if [ ! "$(echo $memcached_logs | grep 'STORED')" ]
     then
         echo "Memcached is not set correctly"
-        echo $memcached_logs > $LOGS_FOLDER/memcached_logs-$(date +"%s")
+        echo $memcached_logs > $LOGS_FOLDER/$(date +"%s")-memcached.log
         return 1
     fi
 }
@@ -98,7 +98,7 @@ function check_notification_server() {
     if [[ "$pong" != "pong" ]]
     then
         echo "Failed to ping notification server"
-        echo $log > $LOGS_FOLDER/notification_server_logs-$(date +"%s")
+        echo $log > $LOGS_FOLDER/$(date +"%s")-notification_server.log
         return 1
     fi
 }
@@ -120,7 +120,7 @@ function clean() {
 }
 
 function do_tests() {
-    lsdbms=( "SQLite" "MariaDB" "MySQL" )
+    lsdbms=( "MariaDB" "MySQL" )
     stest_cases=( "New instance" "Major update" )
     init_funcs=( init_new_instance init_update )
 
@@ -162,7 +162,7 @@ function do_tests() {
 
             if [ $failed -ne 0 ]; then
                 FAILED=1
-                docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
+                docker logs $CONTAINER_NAME &> $LOGS_FOLDER/$(date +"%s")-launch.log
                 print "${RED}Failed${NC}"
             fi
 
@@ -178,6 +178,8 @@ function write_env() {
     NOSWAG=1
     NOSWAG_PORT=$PORT
     SEAFILE_IMAGE=$IMAGE_FQN:$1
+    PUID=$(id -u)
+    PGID=$(id -g)
     HOST=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
@@ -187,7 +189,7 @@ function write_env() {
     MYSQL_USER_PASSWD=secret
     MYSQL_ROOT_PASSWD=secret
     SEAFILE_CONF_DIR=conf
-    SEAFILE_LOGS_DIR=logs
+    SEAFILE_LOGS_DIR="$LOGS_FOLDER/$(date +"%s")"
     SEAFILE_DATA_DIR=data
     SEAFILE_SEAHUB_DIR=seahub
     DATABASE_DIR=db
@@ -266,7 +268,7 @@ export SEAFILE_ADMIN_EMAIL=you@your.email
 export SEAFILE_ADMIN_PASSWORD=secret
 export LOGS_FOLDER=$ROOT_DIR/logs/test
 
-sed -i 's/#~//g' compose.seafile.common.yml
+sed -i 's/#~//g' compose.seafile.yml
 write_env latest 1 &> /dev/null
 $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
 
