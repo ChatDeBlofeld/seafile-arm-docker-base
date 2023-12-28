@@ -56,7 +56,15 @@ then
     MYSQL="-mysql"
     SQLITE=""
 else
-    print "Using SQLite setup"
+    print "------------------------------------------------------------------------"
+    print "                    SQLITE SUPPORT HAS BEEN REMOVED"
+    print "See deprecation announcement:"
+    print "   https://forum.seafile.com/t/seafile-community-edition-11-0-and-seadoc-0-2-is-ready-for-testing/18696"
+    print "Please follow migration guide:"
+    # FIXME: migration guide
+    print "..."
+    print "------------------------------------------------------------------------"
+    exit 1
 fi
 
 detectAutoMode
@@ -85,7 +93,7 @@ print "Exposing media folder in the volume"
 cp -r ./media /shared/
 ln -s /shared/media ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub
 
-if [[ "$AUTO" && ! "$SQLITE" ]]
+if [[ "$AUTO" ]]
 then
     print "Waiting for db"
     /home/seafile/wait_for_db.sh
@@ -96,7 +104,7 @@ LOGFILE=./install.log
 (set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE; exit 0)
 
 # Handle db starting twice at init edge case
-if [[ "$AUTO" && ! "$SQLITE" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
+if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -137,16 +145,6 @@ cp -r ./seahub-data /shared/ && rm -rf ./seahub-data
 mkdir /shared/seahub-data/custom
 # Avoid unnecessary error line when the folder is already created by a volume mapping
 if [ ! -d "/shared/logs" ]; then mkdir /shared/logs; fi
-# Expose sqlite db
-if [ "$SQLITE" ]
-then
-    if [ ! -d "/shared/sqlite" ]; then mkdir /shared/sqlite; fi
-    mv ./seahub.db /shared/sqlite/
-    mv /shared/seafile-data/seafile.db /shared/sqlite/
-    ln -s /shared/sqlite/seafile.db /shared/seafile-data/
-    mv ./ccnet/* /shared/sqlite/
-    rm -rf ./ccnet
-fi
 
 if [ "$AUTO" ]
 then
