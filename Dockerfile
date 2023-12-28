@@ -12,10 +12,11 @@ RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-g
     sqlite3 \
     libmariadb3 \
     libmemcached11 \
+    libldap-2.5-0 \
     python3 \
-    python3-pkg-resources \
-    && /requirements/install.sh -nl $TARGETPLATFORM \
-    && rm -rf /var/lib/apt/lists/*
+    && /requirements/install.sh -nl $TARGETPLATFORM
+    # FIXME: apt broken when removing this folder
+    # && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
 

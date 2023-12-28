@@ -1,3 +1,6 @@
+python3-pkg-resources 
+python3-pymysql
+
 python3-cffi
 python3-ldap
 python3-lxml
@@ -5,6 +8,7 @@ python3-markupsafe
 python3-pil
 python3-pylibmc
 python3-sqlalchemy
+python3-yaml
 
 # Some other platform specific dependencies
 libopenjp2-7

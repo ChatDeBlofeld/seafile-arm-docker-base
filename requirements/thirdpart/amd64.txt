@@ -6,3 +6,4 @@ pillow==10.0.*
 pylibmc
 python-ldap==3.4.3
 sqlalchemy==2.0.18
+PyYAML
