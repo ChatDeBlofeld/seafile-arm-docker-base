@@ -65,7 +65,7 @@ if [ "$CURRENT_REVISION" -lt 14 ]; then
 
     print "Generate seafevents.conf"
     SEAHUB_DB=`awk -F ':' '/DATABASES/{a=1}a==1&&$1~/NAME/{print $2;exit}' ${SEAFILE_CENTRAL_CONF_DIR}/seahub_settings.py`
-    SEAHUB_DB=$(echo $DB_NAME | sed "s/'//g" | sed "s/,//g")
+    SEAHUB_DB=$(echo "$SEAHUB_DB" | sed "s/'//g" | sed "s/,//g")
     python3 $INSTALLPATH/pro/pro.py setup --mysql --mysql_host "$MYSQL_HOST" --mysql_port "$MYSQL_PORT" --mysql_user "$MYSQL_USER" --mysql_password "$MYSQL_USER_PASSWD" --mysql_db "$SEAHUB_DB"
     SEAFEVENTS_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/seafevents.conf"
     echo "[DATABASE]"                       >  $SEAFEVENTS_CONFIG_FILE
