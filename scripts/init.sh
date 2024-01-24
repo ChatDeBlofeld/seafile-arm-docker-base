@@ -59,10 +59,7 @@ else
     print "------------------------------------------------------------------------"
     print "                    SQLITE SUPPORT HAS BEEN REMOVED"
     print "See deprecation announcement:"
-    print "   https://forum.seafile.com/t/seafile-community-edition-11-0-and-seadoc-0-2-is-ready-for-testing/18696"
-    print "Please follow migration guide:"
-    # FIXME: migration guide
-    print "..."
+    print "   https://forum.seafile.com/t/major-changes-in-seafile-version-11-0/18474#deprecating-sqlite-database-support-5"
     print "------------------------------------------------------------------------"
     exit 1
 fi

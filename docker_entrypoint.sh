@@ -121,6 +121,7 @@ case "$1" in
     launch) launch;;
     gc) gc ${@:2};;
     shell) su seafile;;
+    sqlite2mysql) su seafile -pc "/home/seafile/sqlite2mysql.sh";;
     *) $1;;
 esac
 
