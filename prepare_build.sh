@@ -74,11 +74,9 @@ do
     cmd="/requirements/install.sh -pl $platform && chown -R $(id -u):$(id -g) /seafile/seahub/thirdpart"
     set -x
     id=($(docker run -d --rm \
-        --platform $platform \
-        --pull always \
         -v "$ROOT_DIR/requirements":/requirements \
         -v "$base_dir":/seafile \
-        $BUILDER_IMAGE /bin/bash -c "$cmd"))
+        $BUILDER_IMAGE:$tag /bin/bash -c "$cmd"))
     set +x
 
     ids+=($id)
