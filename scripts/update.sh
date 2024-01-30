@@ -56,6 +56,24 @@ if [ "$CURRENT_REVISION" -lt 14 ]; then
         exit 1
     fi
 
+    SEAHUB_DB=`awk -F ':' '/DATABASES/{a=1}a==1&&$1~/NAME/{print $2;exit}' ${SEAFILE_CENTRAL_CONF_DIR}/seahub_settings.py`
+    SEAHUB_DB=$(echo "$SEAHUB_DB" | sed "s/'//g" | sed "s/,//g" | xargs)
+
+    # This just makes absolutely no sense, why isn't this fixed upstream!?
+    # https://forum.seafile.com/t/seafile-community-edition-11-0-3-and-seadoc-0-4-are-now-ready/19017/5
+    print "Fix database... !?"
+    python3 - <<PYTHON_SCRIPT
+import MySQLdb
+from time import sleep
+
+db=MySQLdb.connect(host="${MYSQL_HOST}", port=${MYSQL_PORT}, user="$MYSQL_USER",
+                   password="$MYSQL_USER_PASSWD", database="$SEAHUB_DB")
+cursor=db.cursor()
+cursor.execute("ALTER TABLE org_saml_config ADD COLUMN IF NOT EXISTS (domain varchar(255) UNIQUE DEFAULT NULL);")
+db.commit()
+db.close()
+PYTHON_SCRIPT
+
     print "Update database to Seafile 11 scheme"
     update_db 11.0.0
 
@@ -64,8 +82,6 @@ if [ "$CURRENT_REVISION" -lt 14 ]; then
     echo "CSRF_TRUSTED_ORIGINS = [$url]" >> "$SEAFILE_CENTRAL_CONF_DIR/seahub_settings.py"
 
     print "Generate seafevents.conf"
-    SEAHUB_DB=`awk -F ':' '/DATABASES/{a=1}a==1&&$1~/NAME/{print $2;exit}' ${SEAFILE_CENTRAL_CONF_DIR}/seahub_settings.py`
-    SEAHUB_DB=$(echo "$SEAHUB_DB" | sed "s/'//g" | sed "s/,//g")
     python3 $INSTALLPATH/pro/pro.py setup --mysql --mysql_host "$MYSQL_HOST" --mysql_port "$MYSQL_PORT" --mysql_user "$MYSQL_USER" --mysql_password "$MYSQL_USER_PASSWD" --mysql_db "$SEAHUB_DB"
     SEAFEVENTS_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/seafevents.conf"
     echo "[DATABASE]"                       >  $SEAFEVENTS_CONFIG_FILE
