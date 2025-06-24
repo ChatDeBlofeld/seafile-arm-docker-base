@@ -44,8 +44,8 @@ function rightsManagement() {
     fi
 
     print "Adjusting identifiers"
-    groupmod -g "$PGID" seafile
-    usermod -u "$PUID" seafile
+    groupmod -o -g "$PGID" seafile
+    usermod -o -u "$PUID" seafile
 
     dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
     for dir in "${dirs[@]}"

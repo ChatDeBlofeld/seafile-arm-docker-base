@@ -11,7 +11,7 @@ set -Eeo pipefail
 while getopts l:pn flag
 do
     case "${flag}" in
-        p) PIP=true;;
+        p) PYTHON=true;;
         n) NATIVE=true;;
         l) arch="$(sed 's#linux/##' <<< $OPTARG)";
            TAG="$(sed 's#/##' <<< $arch)";;
@@ -26,14 +26,14 @@ if [[ -f "$REQUIREMENTS_DIR/native/$TAG.txt" && $NATIVE ]]; then
     grep -vE '^#' "$REQUIREMENTS_DIR/native/$TAG.txt" | xargs apt-get install -y
 fi
 
-if [ $PIP ]; then
+if [ $PYTHON ]; then
     mkdir -p /haiwen-build/seahub_thirdparty
-    if [ -f "$REQUIREMENTS_DIR/thirdpart/$TAG.txt" ]; then 
-        python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart/$TAG.txt" --target /seafile/seahub/thirdpart --no-cache --upgrade
+    if [ -f "$REQUIREMENTS_DIR/python/$TAG.txt" ]; then 
+        python3 -m pip install -r "$REQUIREMENTS_DIR/python/$TAG.txt" --target /seafile/seahub/thirdpart --no-cache --upgrade
     fi
 
-    if [ -f "$REQUIREMENTS_DIR/thirdpart_no_deps/$TAG.txt" ]; then 
-        python3 -m pip install -r "$REQUIREMENTS_DIR/thirdpart_no_deps/$TAG.txt" --target /seafile/seahub/thirdpart --no-cache --upgrade --no-deps
+    if [ -f "$REQUIREMENTS_DIR/python_no_deps/$TAG.txt" ]; then 
+        python3 -m pip install -r "$REQUIREMENTS_DIR/python_no_deps/$TAG.txt" --target /seafile/seahub/thirdpart --no-cache --upgrade --no-deps
     fi
 
     # rm -rf $(find /haiwen-build/seahub_thirdparty -name "__pycache__")

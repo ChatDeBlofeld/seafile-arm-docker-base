@@ -7,11 +7,11 @@ python3-lxml
 python3-markupsafe
 python3-pil
 python3-pylibmc
-python3-sqlalchemy
+# python3-sqlalchemy
 python3-yaml
 
 # Some other platform specific dependencies
 libopenjp2-7
-libtiff5
+libtiff6
 libxcb1
 libfreetype6

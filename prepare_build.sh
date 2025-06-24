@@ -2,6 +2,25 @@
 
 set -Eeo pipefail
 
+print_help() {
+    cat <<EOF
+Usage: $0 [options]
+
+Options:
+  -B <image>    Builder image (required)                  [BUILDER_IMAGE]
+  -o <dir>      Output directory (default: ./seafile)     [OUTPUT_DIR]
+  -p <dir>      Packages directory (default: ./packages)  [PACKAGES_DIR]
+  -P <plats>    Platforms (comma-separated, required)     [MULTIARCH_PLATFORMS]
+  -v <version>  Seafile server version (required)         [SEAFILE_SERVER_VERSION]
+  -h            Show this help and exit
+
+You can also set any of the bracketed environment variables above in a .env file
+in the script directory, instead of passing them as command line arguments.
+Command line arguments take precedence over settings defined in the .env file.
+
+EOF
+}
+
 if [ -z "$NO_ENV" ]
 then
     echo "Loading environment..."
@@ -10,23 +29,15 @@ then
     set +a
 fi
 
-while getopts B:o:c:P:e123456789ATv: flag
+while getopts B:o:p:P:v:h flag
 do
     case "${flag}" in
-        # R) REVISION=$OPTARG;;
-        # D) DOCKERFILE_DIR=$OPTARG;;
-        # f) DOCKERFILE="$OPTARG";;
-        # r) REGISTRY="$OPTARG/";;
-        # u) REPOSITORY=$OPTARG;;
-        # i) IMAGE=$OPTARG;;
         B) BUILDER_IMAGE=$OPTARG;;
         o) OUTPUT_DIR=$OPTARG;;
         p) PACKAGES_DIR=$OPTARG;;
         P) MULTIARCH_PLATFORMS=$OPTARG;;
-        e) EXPORT=1;;
-        # l) OUTPUT="--load"; MULTIARCH_PLATFORMS="linux/$OPTARG";;
         v) SEAFILE_SERVER_VERSION=$OPTARG;;
-        # q) QUIET="-q";;
+        h) print_help; exit 0;;
         :) exit 1;;
         \?) exit 1;; 
     esac
@@ -35,6 +46,22 @@ done
 if [ ! "$PACKAGES_DIR" ]; then PACKAGES_DIR="./packages"; fi
 if [ ! "$OUTPUT_DIR" ]; then OUTPUT_DIR="./seafile"; fi
 
+# Check required variables
+if [ -z "$BUILDER_IMAGE" ]; then
+    echo "Error: BUILDER_IMAGE is required"
+    exit 1
+fi
+
+if [ -z "$MULTIARCH_PLATFORMS" ]; then
+    echo "Error: MULTIARCH_PLATFORMS is required"
+    exit 1
+fi
+
+if [ -z "$SEAFILE_SERVER_VERSION" ]; then
+    echo "Error: SEAFILE_SERVER_VERSION is required"
+    exit 1
+fi
+
 if [ ! -d "$PACKAGES_DIR" ]; then
     echo "Packages directory does not exist"
     exit 1
@@ -42,6 +69,10 @@ fi
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$ROOT_DIR"
+
+# Register/update emulators
+docker pull tonistiigi/binfmt:latest >/dev/null
+docker run --rm --privileged tonistiigi/binfmt --install all >/dev/null
 
 CACHE_DIR="$ROOT_DIR/$CACHE_DIR"
 OUTPUT_DIR="$ROOT_DIR/$OUTPUT_DIR"
@@ -67,7 +98,13 @@ do
     base_dir="$OUTPUT_DIR/$platform/seafile-server-$SEAFILE_SERVER_VERSION"
 
     # Prepare files from archive
-    tar -xzf $PACKAGES_DIR/$tag/seafile-server-$SEAFILE_SERVER_VERSION-*.tar.gz -C "$OUTPUT_DIR/$platform"
+    # Use the latest (most recently modified) package if multiple exist for the same version
+    archive=$(ls -t $PACKAGES_DIR/$tag/seafile-server-$SEAFILE_SERVER_VERSION-*.tar.gz 2>/dev/null | head -n 1)
+    if [ -z "$archive" ]; then
+        echo "No archive found for $tag"
+        exit 1
+    fi
+    tar -xzf "$archive" -C "$OUTPUT_DIR/$platform"
     mv "$base_dir/seahub/media" "$OUTPUT_DIR/$platform/"
 
     # Install needed dependencies
@@ -76,7 +113,7 @@ do
     id=($(docker run -d --rm \
         -v "$ROOT_DIR/requirements":/requirements \
         -v "$base_dir":/seafile \
-        $BUILDER_IMAGE:$tag /bin/bash -c "$cmd"))
+        "$BUILDER_IMAGE-$tag" /bin/bash -c "$cmd"))
     set +x
 
     ids+=($id)

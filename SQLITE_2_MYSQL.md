@@ -6,7 +6,7 @@ Since Seafile 11, sqlite support is deprecated in Seafile itself (see [announcem
 
 To make writing easier, this guide supposes you're using [my compose topology](https://github.com/ChatDeBlofeld/seafile-arm-docker/tree/3e6bd8a976fa24d946ec5f7b8471004fb6c63303) in the condition of commit `3e6bd8a976fa24d946ec5f7b8471004fb6c63303`. You should pull it if you can. 
 
-There's no black magic though, if your configuration is too far from the recommended one, you can read through [this script](./scripts/sqlite2mysql.sh) that contains all steps.
+There's no black magic though, if your configuration is too far from the recommended one, you can read through [this script](./scripts/sqlite2mysql.sh) that contains all steps. See also the [official migration guide](https://manual.seafile.com/11.0/deploy/migrate_from_sqlite_to_mysql/).
 
 > **WARNING: Backup your db and conf folders.** You've been warned.
 
