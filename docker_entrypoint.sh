@@ -44,8 +44,8 @@ function rightsManagement() {
     fi
 
     print "Adjusting identifiers"
-    groupmod -g "$PGID" seafile
-    usermod -u "$PUID" seafile
+    groupmod -o -g "$PGID" seafile
+    usermod -o -u "$PUID" seafile
 
     dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
     for dir in "${dirs[@]}"
@@ -121,6 +121,7 @@ case "$1" in
     launch) launch;;
     gc) gc ${@:2};;
     shell) su seafile;;
+    sqlite2mysql) su seafile -pc "/home/seafile/sqlite2mysql.sh";;
     *) $1;;
 esac
 

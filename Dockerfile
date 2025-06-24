@@ -1,5 +1,4 @@
-# FIXME: pinned ubuntu version due to riscv issue
-FROM --platform=$TARGETPLATFORM ubuntu:jammy-20221130
+FROM ubuntu:noble
 
 ARG TARGETPLATFORM
 
@@ -11,10 +10,12 @@ RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-g
     procps \
     sqlite3 \
     libmariadb3 \
-    libmemcached11 \
+    libmemcached11t64 \
+    libldap2 \
     python3 \
-    && /requirements/install.sh -nl $TARGETPLATFORM \
-    && rm -rf /var/lib/apt/lists/*
+    && /requirements/install.sh -nl $TARGETPLATFORM
+    # FIXME: apt broken when removing this folder
+    # && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/seafile
 
@@ -33,10 +34,10 @@ ARG SEAFILE_SERVER_VERSION
 ARG REVISION
 
 # Add Seafile version in container context
-ENV SEAFILE_SERVER_VERSION $SEAFILE_SERVER_VERSION
+ENV SEAFILE_SERVER_VERSION=$SEAFILE_SERVER_VERSION
 
 # Add image revision in container context
-ENV REVISION $REVISION
+ENV REVISION=$REVISION
 
 EXPOSE 8000 8080 8082 8083
 

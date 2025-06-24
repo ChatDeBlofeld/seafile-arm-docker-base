@@ -8,6 +8,7 @@ GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
 SEAFILE_CONFIG_FILE="$CONFIG_DIR/seafile.conf"
 WEBDAV_CONFIG_FILE="$CONFIG_DIR/seafdav.conf"
+SEAFEVENTS_CONFIG_FILE="$CONFIG_DIR/seafevents.conf"
 
 function writeCcnetConfig() {
     if [ "$HTTPS_SUFFIX" ]
@@ -24,8 +25,9 @@ function writeGunicornSettings() {
 
 function writeSeahubConfiguration() {
     sed -ni "/SERVICE_URL/!p" $SEAHUB_CONFIG_FILE
-    echo "SERVICE_URL = \"http${HTTPS_SUFFIX}://${SERVER_IP}\"" >> $SEAHUB_CONFIG_FILE
-    echo "FILE_SERVER_ROOT = \"http${HTTPS_SUFFIX}://${SERVER_IP}/seafhttp\"" >> $SEAHUB_CONFIG_FILE
+    echo "SERVICE_URL = \"http${HTTPS_SUFFIX}://${SERVER_IP}\""                 >> $SEAHUB_CONFIG_FILE
+    echo "FILE_SERVER_ROOT = \"http${HTTPS_SUFFIX}://${SERVER_IP}/seafhttp\""   >> $SEAHUB_CONFIG_FILE
+    echo "CSRF_TRUSTED_ORIGINS = [\"http${HTTPS_SUFFIX}://${SERVER_IP}\"]"      >> $SEAHUB_CONFIG_FILE
 
     if [ "$MEMCACHED_HOST" ]
     then
@@ -79,6 +81,27 @@ function writeWebdavConfiguration() {
     echo "share_name = /seafdav"    >> $WEBDAV_CONFIG_FILE
 }
 
+function writeSeafeventsConfiguration() {
+    # Rewrites everything to disable events by default and, especially,
+    # disable pro features that are not available in community edition
+
+    echo "[DATABASE]"                       >  $SEAFEVENTS_CONFIG_FILE
+    echo "type = mysql"                     >> $SEAFEVENTS_CONFIG_FILE
+    echo "host = $MYSQL_HOST"               >> $SEAFEVENTS_CONFIG_FILE
+    echo "port = $MYSQL_PORT"               >> $SEAFEVENTS_CONFIG_FILE
+    echo "username = $MYSQL_USER"           >> $SEAFEVENTS_CONFIG_FILE
+    # FIXME: Will fail if user is root, drop this possibility
+    echo "password = $MYSQL_USER_PASSWD"    >> $SEAFEVENTS_CONFIG_FILE
+    echo "name = $SEAHUB_DB"                >> $SEAFEVENTS_CONFIG_FILE
+
+    echo "[SEAHUB EMAIL]"                   >> $SEAFEVENTS_CONFIG_FILE
+    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
+    echo "interval = 30m"                   >> $SEAFEVENTS_CONFIG_FILE
+
+    echo "[STATISTICS]"                     >> $SEAFEVENTS_CONFIG_FILE
+    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
+}
+
 cd /opt/seafile
 
 echo "Writing ccnet configuration"
@@ -92,6 +115,9 @@ writeSeahubConfiguration
 
 echo "Writing seafile configuration"
 writeSeafileConfiguration
+
+echo "Writing seafevents configuration"
+writeSeafeventsConfiguration
 
 if [ "$WEBDAV" = "1" ]; then
     echo "Writing webdav configuration"

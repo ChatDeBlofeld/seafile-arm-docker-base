@@ -39,7 +39,7 @@ Expose the `/shared` folder within a volume:
 
 This contains all configuration files and data.
 
-### Accessibility
+### Reachability
 
 In bridge mode (default), some ports have to be published for the host to reach the services inside the container. Seahub runs on port `8000` and the file server on port `8082`.
 
@@ -49,7 +49,7 @@ In bridge mode (default), some ports have to be published for the host to reach 
 
 The installation is auto-configured and ready to be used behind Apache/Nginx, [as recommended in the manual](https://manual.seafile.com/deploy/using_mysql/#starting-seafile-server-and-seahub-website).
 
-### Basic parameters
+### Parameters
 
 All these parameters have to be passed as environment variables. Except for `PUID`, `GUID` and `TZ`, they're useful for initialization only (first run) and can be removed afterwards (even mandatory ones).
 
@@ -58,20 +58,11 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`PUID`| *(Optional)* User id of the `seafile` user within the container. Use it to match uid on the host and avoid permission issues. This is a [feature](https://docs.linuxserver.io/general/understanding-puid-and-pgid) taken from the *linuxserver* images. *Default: 1000*|
 |`PGID`| *(Optional)* Idem for group id. *Default: 1000* |
 |`TZ`| *(Optional)* Set the timezone of the container. *Default: UTC* |
-|`SQLITE`| *(Optional)* (0: MySQL/MariaDB setup\|1: SQLite setup) Set the setup script to use. *Default: 0* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
 |`USE_HTTPS`|*(Optional)* (0: Unsecured access is used\|1: Secured access is used) Write configuration for https usage. **This has nothing to do with TLS certificates, it only writes some configuration files as you can see [here](https://manual.seafile.com/deploy/https_with_nginx/#modifying-ccnetconf)**. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
-
-
-#### MySQL/MariaDB specific parameters
-
-I you want a MySQL/MariaDB deployment, you'll have to/can deal with some additional parameters.
-
-| Parameter | Description |
-|:-|:-|
 |`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks is probably the key here. *Default: 127.0.0.1*|
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
@@ -113,28 +104,6 @@ $ docker compose run --rm <seafile service> gc
 $ docker compose start <seafile service>
 ```
 
-### Manual setup 
-
->Warning: This is **not** the intended way to use this image and this exists for legacy reasons. Thus, support may drop.
-
-For manually setting up a server (for example if you refuse to expose some sensitive data in the environment), just run:
-
-```Bash
-$ docker run --rm -it -e SQLITE=0 -v /path/to/seafile/data/:/shared franchetti/seafile-arm
-```
-
->Note: `PUID`, `PGID` and `TZ` parameters are harmless and still useful here if needed.
-
-After submiting the admin credentials, configure the server by editing what you need in the `conf` directory. Then, run something like this:
-
-```Bash
-$ docker run --rm -d --name seafile
-             -v /path/to/seafile/data/:/shared \
-             -p 8000:8000 -p 8082:8082 \
-             -e TZ=Europe/Zurich \
-             franchetti/seafile-arm
-```
-
 ## Directory tree
 
 After the first run, the volume will be filled with the following directories:
@@ -153,93 +122,64 @@ volume_root
 
 >Performance hint: for few users, decrease the number of workers in `gunicorn.conf.py` for lower RAM usage.
 
+>Debug hint: when Seahub fails to start, set `daemon = False` in `gunicorn.conf.py` to run the server in the foreground, error messages will then be printed in the container logs instead of being dropped in the void of asynchronous workers.
+
 ## Build
 
-### (Optional) Local registry
-
-Set up a local registry to cache images, like the builder image. Note that since `docker buildx build` command is executed in a container, the buildx container has to access the registry container (here using a common network `registry`). Host of the registry will be `localhost` on the host and `registry` in a buildx environment. 
-
-```bash
-$ docker network create registry
-$ docker run -d --name registry -p 5000:5000 --network registry registry:2
-$ docker buildx create --name test --driver-opt network=registry
-```
-
-### Dotenv
+### Pre-requisites
 
 Copy the `.env.example` file to `.env`. Then you can either update the dotenv for your needs or use the command line arguments.
 
-### Builder
+To build the python dependencies, you'll need a builder image. Such an image can be build with my fork of the [Seafile for Raspberry PI](https://github.com/ChatDeBlofeld/seafile-rpi) build script.
 
-Download the build script:
+Pre-compiled Seafile packages (that can be built with the script above) are also needed. 
 
-```bash
-$ wget https://raw.githubusercontent.com/haiwen/seafile-rpi/master/build.sh
-```
+### Prepare build
 
-Build and push builder to local registry:
+Every platform needs more or less python dependencies, that have to be built from source if no wheel is available. Dependencies are managed in the `requirements` folder. Rule of thumb is that, if a wheel is available for the platform, use a python package, else a distribution package. Some other actions include uncompressing the Seafile packages and copying them to the right place.
 
-```bash
-$ ./build_image.sh -f Dockerfile.builder -r registry:5000 -t builder -p
-```
-
-See below for all options of the `build_image.sh` script.
-
-### Seafile
-
-Build all and export:
-
-```bash
-$ ./build_server.sh -ATe
-```
+the `prepare_build.sh` script handles that:
 
 ```
-build_server.sh [OPTIONS]
-
-Command line arguments take precedence over settings defined in the .env file
-
+Usage: prepare_build.sh [options]
 
 Options:
-    -P              Override the default platform list
-    -v              Set seafile server version to build
-    -B              Builder image used to build Seafile
-    -o              Output dir for builds (default: ./seafile)
-    -c              Cache dir (default: ./cache)
-    -e              Export cached builds to output dir
-    -1-9            Build selected seafile parts, see build script documentation
-    -A              Build all parts
-    -T              Build thirdpart dependencies, this does NOT use the same option in the build script.
+  -B <image>    Builder image (required)                  [BUILDER_IMAGE]
+  -o <dir>      Output directory (default: ./seafile)     [OUTPUT_DIR]
+  -p <dir>      Packages directory (default: ./packages)  [PACKAGES_DIR]
+  -P <plats>    Platforms (comma-separated, required)     [MULTIARCH_PLATFORMS]
+  -v <version>  Seafile server version (required)         [SEAFILE_SERVER_VERSION]
+  -h            Show this help and exit
+
+Builder image will be automatically suffixed with the platform architecture, like '$BUILDER_IMAGE-arm64'.
+
+You can also set any of the bracketed environment variables above in a .env file
+in the script directory, instead of passing them as command line arguments.
+Command line arguments take precedence over settings defined in the .env file.
 ```
 
-### Image
-
-Build and export to docker client for platform `amd64` with tags `8` and `latest` :
-
-```Bash
-$ ./build_image.sh -t 8 -t latest -l amd64
-```
+### Build the image
 
 ```
-build_image.sh [OPTIONS]
-
-Command line arguments take precedence over settings defined in the .env file
+Usage: build_image.sh [options]
 
 Options:
-    -t              Add a tag. Can be used several times
-    -l <platform>   Load to the local images. One <platform> at time only.
-                    <platform> working choices can be: 
-                        arm/v7 
-                        arm64 
-                        amd64
-                        riscv64
-    -p              Push the image(s) to the remote registry. Incompatible with -l.
-    -R              Image revision
-    -f              Set a specific Dockerfile (default: Dockerfile)
-    -D              Build directory (default: current directory)
-    -P              Override the default platform list. Incompatible with -l.
-    -v              Set seafile server version to build
-    -r              Registry to which upload the image. Need to be set before -t.
-    -u              Repository to which upload the image. Need to be set before -t.
-    -i              Image name. Need to be set before -t.
-    -q              Quiet mode.
+  -B            Prepare build (run prepare_build.sh)
+  -R <rev>      Revision (required)                       [REVISION]
+  -D <dir>      Dockerfile directory (default: .)         [DOCKERFILE_DIR]
+  -f <file>     Dockerfile path (default: Dockerfile)     [DOCKERFILE]
+  -r <registry> Registry (optional)                       [REGISTRY]
+  -u <repo>     Repository (required)                     [REPOSITORY]
+  -i <image>    Image name (required)                     [IMAGE]
+  -t <tag>      Tag (required, can be used multiple times)
+  -p            Push multi-platform image to registry
+  -P <plats>    Platforms (comma-separated, required)     [MULTIARCH_PLATFORMS]
+  -l <arch>     Load single architecture locally
+  -v <version>  Seafile server version (required)         [SEAFILE_SERVER_VERSION]
+  -q            Quiet mode
+  -h            Show this help and exit
+
+You can also set any of the bracketed environment variables above in a .env file
+in the script directory, instead of passing them as command line arguments.
+Command line arguments take precedence over settings defined in the .env file.
 ```

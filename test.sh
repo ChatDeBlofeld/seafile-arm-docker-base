@@ -6,6 +6,30 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+print_help() {
+    cat <<EOF
+Usage: $0 [options]
+
+Options:
+  -R <rev>      Revision (required)                       [REVISION]
+  -r <registry> Registry (optional)                       [REGISTRY]
+  -u <repo>     Repository (required)                     [REPOSITORY]
+  -i <image>    Image name (required)                     [IMAGE]
+  -P <plats>    Platforms (comma-separated, required)     [MULTIARCH_PLATFORMS]
+  -l <arch>     Single architecture (sets MULTIARCH_PLATFORMS to linux/<arch>)
+  -v <version>  Seafile server version (required)         [SEAFILE_SERVER_VERSION]
+  -o <version>  Old version for update tests (required)   [OLD_VERSION]
+  -b <branch>   Branch (default: master)
+  -B            Build images before testing
+  -h            Show this help and exit
+
+You can also set any of the bracketed environment variables above in a .env file
+in the script directory, instead of passing them as command line arguments.
+Command line arguments take precedence over settings defined in the .env file.
+
+EOF
+}
+
 function print() {
     echo -e "[$platform|$sdbms|$stest_case] $@"
 }
@@ -45,7 +69,7 @@ function launch() {
     done
 
     if [ $c -eq $timeout ]; then 
-        docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
+        docker logs $CONTAINER_NAME &> $LOGS_FOLDER/$(date +"%s")-launch.log
         return 1
     fi
 }
@@ -63,7 +87,7 @@ function check_gc() {
 
     if [ "$(echo -e $log | grep 'failed_flag')" != "" ]; then
         echo "Garbage collection failed"
-        echo $log > $LOGS_FOLDER/gc-$(date +"%s")
+        echo $log > $LOGS_FOLDER/$(date +"%s")-gc.log
         return 1
     fi
 }
@@ -75,12 +99,12 @@ function check_memcached() {
 
     echo "------- MEMCACHED TEST -------"
     echo "Check if memcached is configured correctly"
-    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached)
+    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached &> /dev/null)
 
     if [ ! "$(echo $memcached_logs | grep 'STORED')" ]
     then
         echo "Memcached is not set correctly"
-        echo $memcached_logs > $LOGS_FOLDER/memcached_logs-$(date +"%s")
+        echo $memcached_logs > $LOGS_FOLDER/$(date +"%s")-memcached.log
         return 1
     fi
 }
@@ -98,7 +122,7 @@ function check_notification_server() {
     if [[ "$pong" != "pong" ]]
     then
         echo "Failed to ping notification server"
-        echo $log > $LOGS_FOLDER/notification_server_logs-$(date +"%s")
+        echo $log > $LOGS_FOLDER/$(date +"%s")-notification_server.log
         return 1
     fi
 }
@@ -120,7 +144,7 @@ function clean() {
 }
 
 function do_tests() {
-    lsdbms=( "SQLite" "MariaDB" "MySQL" )
+    lsdbms=( "MariaDB" "MySQL" )
     stest_cases=( "New instance" "Major update" )
     init_funcs=( init_new_instance init_update )
 
@@ -162,7 +186,7 @@ function do_tests() {
 
             if [ $failed -ne 0 ]; then
                 FAILED=1
-                docker logs $CONTAINER_NAME &> $LOGS_FOLDER/launch-$(date +"%s")
+                docker logs $CONTAINER_NAME &> $LOGS_FOLDER/$(date +"%s")-launch.log
                 print "${RED}Failed${NC}"
             fi
 
@@ -178,6 +202,9 @@ function write_env() {
     NOSWAG=1
     NOSWAG_PORT=$PORT
     SEAFILE_IMAGE=$IMAGE_FQN:$1
+    PUID=$(id -u)
+    PGID=$(id -g)
+    TZ=Europe/Zurich
     HOST=$HOST
     PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
@@ -187,7 +214,7 @@ function write_env() {
     MYSQL_USER_PASSWD=secret
     MYSQL_ROOT_PASSWD=secret
     SEAFILE_CONF_DIR=conf
-    SEAFILE_LOGS_DIR=logs
+    SEAFILE_LOGS_DIR="$LOGS_FOLDER/$(date +"%s")"
     SEAFILE_DATA_DIR=data
     SEAFILE_SEAHUB_DIR=seahub
     DATABASE_DIR=db
@@ -202,33 +229,54 @@ set -o allexport
 set +o allexport
 [ -f ./tests/feature_table.env ] && . ./tests/feature_table.env
 
-while getopts R:D:r:u:i:v:h:d:l:P:o:b:B flag
+while getopts R:r:u:i:P:l:v:o:b:Bh flag
 do
     case "${flag}" in
         R) export REVISION=$OPTARG;;
-        D) export DOCKERFILE_DIR=$OPTARG;;
         r) export REGISTRY="$OPTARG/";;
         u) export REPOSITORY=$OPTARG;;
         i) export IMAGE=$OPTARG;;
         P) export MULTIARCH_PLATFORMS=$OPTARG;;
         l) export MULTIARCH_PLATFORMS="linux/$OPTARG";;
-        v) export SEAFILE_SERVER_VERSION=$OPTARG
-           export PYTHON_REQUIREMENTS_URL_SEAHUB="https://raw.githubusercontent.com/haiwen/seahub/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
-           export PYTHON_REQUIREMENTS_URL_SEAFDAV="https://raw.githubusercontent.com/haiwen/seafdav/v${SEAFILE_SERVER_VERSION}-server/requirements.txt"
-           ;;
-        h) export PYTHON_REQUIREMENTS_URL_SEAHUB=$OPTARG;;
-        d) export PYTHON_REQUIREMENTS_URL_SEAFDAV=$OPTARG;;
+        v) export SEAFILE_SERVER_VERSION=$OPTARG;;
         o) OLD_VERSION=$OPTARG;;
         b) BRANCH=$OPTARG;;
         B) BUILD=1;;
+        h) print_help; exit 0;;
         :) exit;;
         \?) exit;; 
     esac
 done
 
-if [ ! "$OLD_VERSION" ]; then 
-    echo "Missing OLD_VERSION"
-    exit
+# Check required variables
+if [ -z "$REVISION" ]; then
+    echo "Error: REVISION is required"
+    exit 1
+fi
+
+if [ -z "$REPOSITORY" ]; then
+    echo "Error: REPOSITORY is required"
+    exit 1
+fi
+
+if [ -z "$IMAGE" ]; then
+    echo "Error: IMAGE is required"
+    exit 1
+fi
+
+if [ -z "$MULTIARCH_PLATFORMS" ]; then
+    echo "Error: MULTIARCH_PLATFORMS is required"
+    exit 1
+fi
+
+if [ -z "$SEAFILE_SERVER_VERSION" ]; then
+    echo "Error: SEAFILE_SERVER_VERSION is required"
+    exit 1
+fi
+
+if [ -z "$OLD_VERSION" ]; then 
+    echo "Error: OLD_VERSION is required"
+    exit 1
 fi
 
 if [ "$REGISTRY" != "" ]; then REGISTRY="$REGISTRY/"; fi
@@ -253,8 +301,8 @@ cd $ROOT_DIR
 rm -rf $TOPOLOGY_DIR
 git clone https://github.com/ChatDeBlofeld/seafile-arm-docker $TOPOLOGY &> /dev/null
 CONTAINER_NAME=$TOPOLOGY-seafile-1
-rm -rf logs
-mkdir logs
+rm -rf logs/test
+mkdir -p logs/test
 cd $TOPOLOGY_DIR
 git checkout $BRANCH
 
@@ -264,9 +312,9 @@ export HOST=127.0.0.1
 export PORT=44444
 export SEAFILE_ADMIN_EMAIL=you@your.email
 export SEAFILE_ADMIN_PASSWORD=secret
-export LOGS_FOLDER=$ROOT_DIR/logs
+export LOGS_FOLDER=$ROOT_DIR/logs/test
 
-sed -i 's/#~//g' compose.seafile.common.yml
+sed -i 's/#~//g' compose.seafile.yml
 write_env latest 1 &> /dev/null
 $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
 

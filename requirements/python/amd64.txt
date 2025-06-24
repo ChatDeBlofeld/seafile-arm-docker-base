@@ -1,0 +1,10 @@
+cffi==1.15.1
+cryptography
+lxml
+markupsafe==2.0.1
+mysqlclient==2.1.*
+pillow==10.2.*
+pylibmc
+python-ldap==3.4.3
+sqlalchemy==2.0.18
+PyYAML
