@@ -14,7 +14,7 @@ Options:
   -r <registry> Registry (optional)                       [REGISTRY]
   -u <repo>     Repository (required)                     [REPOSITORY]
   -i <image>    Image name (required)                     [IMAGE]
-  -t <tag>      Tag (required, can be used multiple times)
+  -t <tag>      Tag (can be used multiple times)
   -p            Push multi-platform image to registry
   -P <plats>    Platforms (comma-separated, required)     [MULTIARCH_PLATFORMS]
   -l <arch>     Load single architecture locally
@@ -85,11 +85,6 @@ fi
 
 if [ -z "$SEAFILE_SERVER_VERSION" ]; then
     echo "Error: SEAFILE_SERVER_VERSION is required"
-    exit 1
-fi
-
-if [ -z "$TAGS" ]; then
-    echo "Error: At least one tag (-t) is required"
     exit 1
 fi
 
