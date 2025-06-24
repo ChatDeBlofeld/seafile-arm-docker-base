@@ -16,6 +16,7 @@ function detectAutoMode() {
         # So just keep it that way and wait for fixes (if they happen)
         AUTO="auto -n useless"
     else
+        # TODO: remove manual mode in the future
         print "Manual mode detected"
     fi
 }

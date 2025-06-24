@@ -14,6 +14,8 @@ Options:
   -v <version>  Seafile server version (required)         [SEAFILE_SERVER_VERSION]
   -h            Show this help and exit
 
+Builder image will be automatically suffixed with the platform architecture, like '$BUILDER_IMAGE-arm64'.
+
 You can also set any of the bracketed environment variables above in a .env file
 in the script directory, instead of passing them as command line arguments.
 Command line arguments take precedence over settings defined in the .env file.
