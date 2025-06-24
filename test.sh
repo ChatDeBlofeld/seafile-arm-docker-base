@@ -99,7 +99,7 @@ function check_memcached() {
 
     echo "------- MEMCACHED TEST -------"
     echo "Check if memcached is configured correctly"
-    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached &> /dev/null)
+    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached)
 
     if [ ! "$(echo $memcached_logs | grep 'STORED')" ]
     then
