@@ -4,7 +4,7 @@ Since Seafile 11, sqlite support is deprecated in Seafile itself (see [announcem
 
 ## Prerequisites
 
-To make writing easier, this guide supposes you're using [my compose topology](https://github.com/ChatDeBlofeld/seafile-arm-docker/tree/3e6bd8a976fa24d946ec5f7b8471004fb6c63303) in the condition of commit `3e6bd8a976fa24d946ec5f7b8471004fb6c63303`. You should pull it if you can. 
+To make writing easier, this guide supposes you're using [my compose topology](https://github.com/ChatDeBlofeld/seafile-arm-docker/tree/2023.05) in the condition of tag `2023.05`. You should pull it/adapt yours if you can. Especially, make sure the `MYSQL_USER_PASSWD` variable is set (as well as any other customized database variable).
 
 There's no black magic though, if your configuration is too far from the recommended one, you can read through [this script](./scripts/sqlite2mysql.sh) that contains all steps. See also the [official migration guide](https://manual.seafile.com/11.0/deploy/migrate_from_sqlite_to_mysql/).
 
@@ -37,6 +37,8 @@ Then dump the databases:
 ```bash
 ./compose.sh run --rm -v $(pwd)/sqlite:/shared/sqlite seafile sqlite2mysql
 ```
+
+Ignore all warnings about `invalid escape sequence`.
 
 ## Restore
 
