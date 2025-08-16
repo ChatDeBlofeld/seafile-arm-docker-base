@@ -11,7 +11,7 @@ WEBDAV_CONFIG_FILE="$CONFIG_DIR/seafdav.conf"
 SEAFEVENTS_CONFIG_FILE="$CONFIG_DIR/seafevents.conf"
 
 function writeCcnetConfig() {
-    if [ "$HTTPS_SUFFIX" ]
+    if [ "$HTTP_PROTO" = "https" ]
     then
         echo "USE_X_FORWARDED_HOST = True" >> $CCNET_CONFIG_FILE
         echo "SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')" >> $CCNET_CONFIG_FILE
@@ -25,9 +25,9 @@ function writeGunicornSettings() {
 
 function writeSeahubConfiguration() {
     sed -ni "/SERVICE_URL/!p" $SEAHUB_CONFIG_FILE
-    echo "SERVICE_URL = \"http${HTTPS_SUFFIX}://${SERVER_IP}\""                 >> $SEAHUB_CONFIG_FILE
-    echo "FILE_SERVER_ROOT = \"http${HTTPS_SUFFIX}://${SERVER_IP}/seafhttp\""   >> $SEAHUB_CONFIG_FILE
-    echo "CSRF_TRUSTED_ORIGINS = [\"http${HTTPS_SUFFIX}://${SERVER_IP}\"]"      >> $SEAHUB_CONFIG_FILE
+    echo "SERVICE_URL = \"${HTTP_PROTO}://${SERVER_IP}\""                 >> $SEAHUB_CONFIG_FILE
+    echo "FILE_SERVER_ROOT = \"${HTTP_PROTO}://${SERVER_IP}/seafhttp\""   >> $SEAHUB_CONFIG_FILE
+    echo "CSRF_TRUSTED_ORIGINS = [\"${HTTP_PROTO}://${SERVER_IP}\"]"      >> $SEAHUB_CONFIG_FILE
 
     if [ "$MEMCACHED_HOST" ]
     then

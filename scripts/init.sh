@@ -46,9 +46,10 @@ then
     export SERVER_IP=${SERVER_IP}:${PORT}
 fi
 
+export HTTP_PROTO="http"
 if [ "$USE_HTTPS" == "1" ]
 then
-  export HTTPS_SUFFIX="s"
+  export HTTP_PROTO="https"
 fi
 
 if [ "$SQLITE" != "1" ]
