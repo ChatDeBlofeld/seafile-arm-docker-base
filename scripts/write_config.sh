@@ -90,7 +90,6 @@ function writeSeafeventsConfiguration() {
     echo "host = $MYSQL_HOST"               >> $SEAFEVENTS_CONFIG_FILE
     echo "port = $MYSQL_PORT"               >> $SEAFEVENTS_CONFIG_FILE
     echo "username = $MYSQL_USER"           >> $SEAFEVENTS_CONFIG_FILE
-    # FIXME: Will fail if user is root, drop this possibility
     echo "password = $MYSQL_USER_PASSWD"    >> $SEAFEVENTS_CONFIG_FILE
     echo "name = $SEAHUB_DB"                >> $SEAFEVENTS_CONFIG_FILE
 

@@ -13,6 +13,21 @@ then
     exit 1
 fi
 
+if [[ -z "$SEAFILE_ADMIN_EMAIL" || -z "$SEAFILE_ADMIN_PASSWORD" || 
+      -z "$MYSQL_USER_PASSWD" || -z "$MYSQL_ROOT_PASSWD" ]]
+then
+    print "Missing mandatory environment variables"
+    print "Please set SEAFILE_ADMIN_EMAIL, SEAFILE_ADMIN_PASSWORD, MYSQL_USER_PASSWD and MYSQL_ROOT_PASSWD"
+    exit 1
+fi
+
+if [ "$MYSQL_USER" = "root" ]
+then
+    print "Cannot use root user for the standard user"
+    print "Please set a different user name in MYSQL_USER"
+    exit 1
+fi
+
 print "Setting default environment"
 export SERVER_IP=${SERVER_IP:=127.0.0.1}
 export MYSQL_HOST=${MYSQL_HOST:=127.0.0.1}

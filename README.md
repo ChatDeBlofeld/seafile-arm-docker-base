@@ -67,7 +67,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`MYSQL_PORT`|*(Optional)* Port of the MySQL server. *Default: 3306*|
 |`USE_EXISTING_DB`|*(Optional)* (0: Create new databases\|1: Use existing ones) Use already created databases or create new ones. Using existing DBs is a **fully untested** option but this is provided by the Seafile installation script. So, well, it's documented here. *Default: 0*|
 |`MYSQL_USER`|*(Optional)* Standard user name. Will be created and granted admin permissions on all databases below. *Default: seafile*|
-|`MYSQL_USER_PASSWD`|**(Mandatory if `MYSQL_USER` isn't `root`)** Standard user password.|
+|`MYSQL_USER_PASSWD`|**(Mandatory)** Standard user password.|
 |`MYSQL_USER_HOST`|*(Optional)* Authorized host for the standard user. *Default: %*|
 |`MYSQL_ROOT_PASSWD`|**(Mandatory)** Password of the root user. |
 |`CCNET_DB`|*(Optional)* Name of the ccnet db. *Default: ccnet_db*|
