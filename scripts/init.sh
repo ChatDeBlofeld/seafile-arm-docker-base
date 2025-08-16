@@ -6,6 +6,20 @@ function print() {
     echo "$(date +"%F %T") [Init] $*"
 }
 
+if [ "$SQLITE" != "1" ]
+then
+    print "Using MySQL/MariaDB setup"
+    MYSQL="-mysql"
+    SQLITE=""
+else
+    print "------------------------------------------------------------------------"
+    print "                    SQLITE SUPPORT HAS BEEN REMOVED"
+    print "See deprecation announcement:"
+    print "   https://forum.seafile.com/t/major-changes-in-seafile-version-11-0/18474#deprecating-sqlite-database-support-5"
+    print "------------------------------------------------------------------------"
+    exit 1
+fi
+
 if [[ "$SEAFILE_DIR" || "$SEAHUB_PORT" || "$FILESERVER_PORT" ]]
 then
     print "Unsupported parameters"
@@ -50,20 +64,6 @@ export HTTP_PROTO="http"
 if [ "$USE_HTTPS" == "1" ]
 then
   export HTTP_PROTO="https"
-fi
-
-if [ "$SQLITE" != "1" ]
-then
-    print "Using MySQL/MariaDB setup"
-    MYSQL="-mysql"
-    SQLITE=""
-else
-    print "------------------------------------------------------------------------"
-    print "                    SQLITE SUPPORT HAS BEEN REMOVED"
-    print "See deprecation announcement:"
-    print "   https://forum.seafile.com/t/major-changes-in-seafile-version-11-0/18474#deprecating-sqlite-database-support-5"
-    print "------------------------------------------------------------------------"
-    exit 1
 fi
 
 cd /opt/seafile
