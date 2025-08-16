@@ -71,7 +71,6 @@ cd /opt/seafile
 if [ -L "./conf" ]
 then
     print "Cleaning old links"
-    rm -rf ./ccnet
     rm -f ./conf
     rm -f ./logs
     rm -f ./seafile-data
@@ -108,7 +107,6 @@ then
 
     print "Cleaning failed configuration"
     rm -rf ./conf
-    rm -rf ./ccnet
 
     print "Waiting for db... again"
     /home/seafile/wait_for_db.sh

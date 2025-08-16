@@ -25,8 +25,4 @@ then
     ln -s /shared/seafile-data .
     ln -s /shared/seahub-data .
     ln -s /shared/logs .
-    if [ ! -d "./ccnet" ]
-    then
-        mkdir ccnet # Totally useless but still needed for the server to launch
-    fi
 fi
