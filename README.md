@@ -115,7 +115,6 @@ volume_root
 ├── media
 ├── seafile-data
 ├── seahub-data
-└── sqlite (SQLite installation only)
 ```
 
 ## Miscellaneous

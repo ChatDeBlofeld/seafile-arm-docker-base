@@ -47,7 +47,7 @@ function rightsManagement() {
     groupmod -o -g "$PGID" seafile
     usermod -o -u "$PUID" seafile
 
-    dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data" "/shared/sqlite")
+    dirs=("/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data")
     for dir in "${dirs[@]}"
     do
         if [[ -d "$dir" && ("$(stat -c %u "$dir")" != "$PUID" || "$(stat -c %g "$dir")" != "$PGID") ]]
@@ -121,7 +121,6 @@ case "$1" in
     launch) launch;;
     gc) gc ${@:2};;
     shell) su seafile;;
-    sqlite2mysql) su seafile -pc "/home/seafile/sqlite2mysql.sh";;
     *) $1;;
 esac
 

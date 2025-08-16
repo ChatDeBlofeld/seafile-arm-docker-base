@@ -8,7 +8,6 @@ RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-g
     sudo \
     tzdata \
     procps \
-    sqlite3 \
     libmariadb3 \
     libmemcached11t64 \
     libldap2 \
