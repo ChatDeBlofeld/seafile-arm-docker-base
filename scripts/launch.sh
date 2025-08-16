@@ -51,6 +51,14 @@ then
     if [ $? != 0 ]; then exit 1; fi
 fi
 
+if [ -f "/shared/conf/seafile.env" ]
+then
+    print "Loading environment variables from seafile.env"
+    set -o allexport
+    . /shared/conf/seafile.env
+    set +o allexport
+fi
+
 print "Launching seafile"
 ./seafile-server-latest/seafile.sh start
 ./seafile-server-latest/seahub.sh start

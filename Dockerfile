@@ -12,6 +12,7 @@ RUN apt-get update && apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-g
     libmemcached11t64 \
     libldap2 \
     python3 \
+    pwgen \
     && /requirements/install.sh -nl $TARGETPLATFORM
     # FIXME: apt broken when removing this folder
     # && rm -rf /var/lib/apt/lists/*

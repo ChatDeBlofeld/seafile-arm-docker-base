@@ -59,7 +59,7 @@ function rightsManagement() {
 }
 
 function init() {
-    if [ ! -f "/shared/conf/ccnet.conf" ]
+    if [ ! -f "/shared/conf/revision" ]
     then
         print "No config found. Running init script"
         su seafile -pPc "/home/seafile/init.sh"

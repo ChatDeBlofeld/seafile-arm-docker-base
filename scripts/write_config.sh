@@ -3,19 +3,26 @@
 set -Eeo pipefail
 
 CONFIG_DIR="/shared/conf"
-CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
+SEAFILE_ENV_FILE="$CONFIG_DIR/seafile.env"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
 SEAFILE_CONFIG_FILE="$CONFIG_DIR/seafile.conf"
 WEBDAV_CONFIG_FILE="$CONFIG_DIR/seafdav.conf"
 SEAFEVENTS_CONFIG_FILE="$CONFIG_DIR/seafevents.conf"
 
-function writeCcnetConfig() {
-    if [ "$HTTP_PROTO" = "https" ]
-    then
-        echo "USE_X_FORWARDED_HOST = True" >> $CCNET_CONFIG_FILE
-        echo "SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')" >> $CCNET_CONFIG_FILE
-    fi
+function writeSeafileEnv() {
+    echo "# This file is the equivalent of the .env file mentioned in the Seafile documentation since version 12."   > $SEAFILE_ENV_FILE
+    echo "# It is generated for compatibility and smooth upgrades."                                                 >> $SEAFILE_ENV_FILE
+    echo "# Remove it if you wan't to set the environment variables directly from docker (e.g. in a compose file)." >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_USER=${SEAFILE_MYSQL_DB_USER}"                                                           >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_PASSWORD=${SEAFILE_MYSQL_DB_PASSWORD}"                                                   >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_CCNET_DB_NAME=${SEAFILE_MYSQL_DB_CCNET_DB_NAME}"                                         >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_SEAFILE_DB_NAME=${SEAFILE_MYSQL_DB_SEAFILE_DB_NAME}"                                     >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_SEAHUB_DB_NAME=${SEAFILE_MYSQL_DB_SEAHUB_DB_NAME}"                                       >> $SEAFILE_ENV_FILE
+    echo "JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}"                                                                       >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_SERVER_HOSTNAME=${SEAFILE_SERVER_HOSTNAME}"                                                       >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_SERVER_PROTOCOL=${SEAFILE_SERVER_PROTOCOL}"                                                       >> $SEAFILE_ENV_FILE
+    echo "TIME_ZONE=${TIME_ZONE}"                                                                                   >> $SEAFILE_ENV_FILE
 }
 
 function writeGunicornSettings() {
@@ -103,8 +110,8 @@ function writeSeafeventsConfiguration() {
 
 cd /opt/seafile
 
-echo "Writing ccnet configuration"
-writeCcnetConfig
+echo "Writing Seafile environment"
+writeSeafileEnv
 
 echo "Writing gunicorn configuration"
 writeGunicornSettings

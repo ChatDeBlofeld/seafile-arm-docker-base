@@ -108,6 +108,7 @@ do
     fi
     tar -xzf "$archive" -C "$OUTPUT_DIR/$platform"
     mv "$base_dir/seahub/media" "$OUTPUT_DIR/$platform/"
+    echo "$SEAFILE_SERVER_VERSION" > "$OUTPUT_DIR/$platform/media/version"
 
     # Install needed dependencies
     cmd="/requirements/install.sh -pl $platform && chown -R $(id -u):$(id -g) /seafile/seahub/thirdpart"

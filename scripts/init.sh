@@ -66,6 +66,18 @@ then
   export HTTP_PROTO="https"
 fi
 
+# New Seafile 12+ environment variables
+export SEAFILE_MYSQL_DB_USER="${MYSQL_USER}"
+export SEAFILE_MYSQL_DB_PASSWORD="${MYSQL_USER_PASSWD}"
+export SEAFILE_MYSQL_DB_CCNET_DB_NAME="${CCNET_DB}"
+export SEAFILE_MYSQL_DB_SEAFILE_DB_NAME="${SEAFILE_DB}"
+export SEAFILE_MYSQL_DB_SEAHUB_DB_NAME="${SEAHUB_DB}"
+export JWT_PRIVATE_KEY="$(pwgen -s 40 1)"
+export SEAFILE_SERVER_HOSTNAME="${SERVER_IP}"
+export SEAFILE_SERVER_PROTOCOL="${HTTP_PROTO}"
+export TIME_ZONE="${TZ:-UTC}"
+
+
 cd /opt/seafile
 
 if [ -L "./conf" ]
