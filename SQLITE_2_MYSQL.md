@@ -8,6 +8,8 @@ To make writing easier, this guide supposes you're using [my compose topology](h
 
 There's no black magic though, if your configuration is too far from the recommended one, you can read through [this script](./scripts/sqlite2mysql.sh) that contains all steps. See also the [official migration guide](https://manual.seafile.com/11.0/deploy/migrate_from_sqlite_to_mysql/).
 
+Your seafile installation should be at version 10, otherwise you should update it first, using the `10` image tag.
+
 > **WARNING: Backup your db and conf folders.** You've been warned.
 
 ## Dump
@@ -24,7 +26,7 @@ Move your `db` folder (containing the sqlite files) to `sqlite`:
 mv db sqlite
 ```
 
-Change the seafile image tag to `11` and add a database service in your compose file. When using my configuration, it only means the following changes in your dotenv:
+Change the seafile image tag to `11` **(will not work with upcoming versions)** and add a database service in your compose file. When using my configuration, it only means the following changes in your dotenv:
 
 ```
 # MariaDB
