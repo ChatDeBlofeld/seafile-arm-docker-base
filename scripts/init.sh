@@ -6,21 +6,6 @@ function print() {
     echo "$(date +"%F %T") [Init] $*"
 }
 
-function detectAutoMode() {
-    if [[ "$SEAFILE_ADMIN_EMAIL" && "$SEAFILE_ADMIN_PASSWORD" ]]
-    then
-        print "Auto mode detected"
-        # Note: it's not possible to just call the script with "auto"
-        # and the server name in argument is never set anywhere thus
-        # it's basically useless.
-        # So just keep it that way and wait for fixes (if they happen)
-        AUTO="auto -n useless"
-    else
-        # TODO: remove manual mode in the future
-        print "Manual mode detected"
-    fi
-}
-
 if [[ "$SEAFILE_DIR" || "$SEAHUB_PORT" || "$FILESERVER_PORT" ]]
 then
     print "Unsupported parameters"
@@ -66,7 +51,6 @@ else
     exit 1
 fi
 
-detectAutoMode
 cd /opt/seafile
 
 if [ -L "./conf" ]
@@ -91,18 +75,15 @@ print "Exposing media folder in the volume"
 cp -r ./media /shared/
 ln -s /shared/media ./seafile-server-"$SEAFILE_SERVER_VERSION"/seahub
 
-if [[ "$AUTO" ]]
-then
-    print "Waiting for db"
-    /home/seafile/wait_for_db.sh
-fi
+print "Waiting for db"
+/home/seafile/wait_for_db.sh
 
 print "Running installation script"
 LOGFILE=./install.log
-(set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh $AUTO |& tee $LOGFILE; exit 0)
+(set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh auto -n useless |& tee $LOGFILE; exit 0)
 
 # Handle db starting twice at init edge case
-if [[ "$AUTO" && "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
+if [[ "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -119,7 +100,7 @@ then
     fi
 
     print "Retrying install"
-    ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh $AUTO | tee $LOGFILE
+    ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh auto -n useless | tee $LOGFILE
 fi
 
 if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
@@ -143,13 +124,10 @@ mkdir /shared/seahub-data/custom
 # Avoid unnecessary error line when the folder is already created by a volume mapping
 if [ ! -d "/shared/logs" ]; then mkdir /shared/logs; fi
 
-if [ "$AUTO" ]
-then
-    print "Setting admin credentials"
-    echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > /shared/conf/admin.txt
+print "Setting admin credentials"
+echo "{\"email\":\"$SEAFILE_ADMIN_EMAIL\", \"password\":\"$SEAFILE_ADMIN_PASSWORD\"}" > /shared/conf/admin.txt
 
-    print "Writing configuration"
-    /home/seafile/write_config.sh
-fi
+print "Writing configuration"
+/home/seafile/write_config.sh
 
 print "Done"
