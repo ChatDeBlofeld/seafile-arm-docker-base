@@ -22,8 +22,8 @@ export SEAFILE_CONF_DIR=${TOPDIR}/seafile-data
 export SEAFILE_CENTRAL_CONF_DIR=${TOPDIR}/conf
 export PYTHONPATH=${INSTALLPATH}/seafile/lib/python3.6/site-packages:${INSTALLPATH}/seafile/lib64/python3.6/site-packages:${INSTALLPATH}/seahub:${INSTALLPATH}/seahub/thirdpart:$PYTHONPATH
 SEAFILE_ENV_FILE="$SEAFILE_CENTRAL_CONF_DIR/seafile.env"
-CCNET_CONFIG_FILE="$CCNET_CONF_DIR/ccnet.conf"
-SEAFILE_CONFIG_FILE="$SEAFILE_CONF_DIR/seafile.conf"
+CCNET_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/ccnet.conf"
+SEAFILE_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/seafile.conf"
 SEAHUB_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/seahub_settings.py"
 GUNICORN_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/gunicorn.conf.py"
 WEBDAV_CONFIG_FILE="$SEAFILE_CENTRAL_CONF_DIR/seafdav.conf"
@@ -63,8 +63,8 @@ if [ "$CURRENT_REVISION" -lt 13 ]; then
 fi
 
 function readSeahubConfig() {
-    SEAHUB_DB="$(awk -F '=' '/\[Database\]/{a=1}a==1&&$1~/NAME/{print $2;exit}' ${SEAHUB_CONFIG_FILE})"
-    SERVICE_URL="$(awk -F '=' '/SERVICE_URL/{print $2;exit}' seahub_settings.py | sed "s/[\" ']//g" | sed -E "s/\/?$//g")"
+    SEAHUB_DB="$(awk -F ':' '/DATABASES/{a=1}a==1&&$1~/NAME/{print $2;exit}' ${SEAHUB_CONFIG_FILE} | sed -E "s/[\"',[:space:]]//g")"
+    SERVICE_URL="$(awk -F '=' '/SERVICE_URL/{print $2;exit}' ${SEAHUB_CONFIG_FILE} | sed "s/[\"'[:space:]]//g" | sed -E "s/\/?$//g")"
     HTTP_PROTO="$(echo "$SERVICE_URL" | cut -d':' -f1)"
     SERVER_IP="$(echo "$SERVICE_URL" | sed "s/${HTTP_PROTO}:\/\///g" | cut -d'/' -f1)"
 }
@@ -111,7 +111,7 @@ fi
 
 if [ "$CURRENT_REVISION" -lt 15 ]; then
     readSeahubConfig
-    ccnet_db=$(awk -F '=' '/\[Database\]/{a=1}a==1&&$1~/DB/{print $2;exit}' ${CCNET_CONFIG_FILE})
+    ccnet_db=$(awk -F '=' '/\[Database\]/{a=1}a==1&&$1~/DB/{print $2;exit}' ${CCNET_CONFIG_FILE} | sed -E "s/[[:space:]]//g")
 
     echo "# This file is the equivalent of the .env file mentioned in the Seafile documentation since version 12."   > $SEAFILE_ENV_FILE
     echo "# It is generated for compatibility and smooth upgrades."                                                 >> $SEAFILE_ENV_FILE
