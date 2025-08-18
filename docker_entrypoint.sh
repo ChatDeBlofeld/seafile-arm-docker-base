@@ -2,6 +2,8 @@
 
 set -Eeo pipefail
 
+. /home/seafile/include.sh
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -74,7 +76,6 @@ function init() {
 
 function launch() {
     init
-    /home/seafile/bind_volume.sh
 
     print "Running launch script"
     su seafile -pc "/home/seafile/launch.sh"
@@ -90,7 +91,8 @@ function launch() {
 }
 
 function gc() {
-    /home/seafile/bind_volume.sh
+    bind_volumes
+    load_seafile_env
 
     print "Running garbage collection"
     /opt/seafile/seafile-server-latest/seaf-gc.sh $@

@@ -2,6 +2,8 @@
 
 set -Eeo pipefail
 
+. /home/seafile/include.sh
+
 function print() {
     echo "$(date +"%F %T") [Launch] $*"
 }
@@ -24,6 +26,8 @@ function readSGBD() {
 }
 
 cd /opt/seafile
+
+bind_volumes
 
 if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$SEAFILE_SERVER_VERSION" ]]
 then
@@ -51,13 +55,7 @@ then
     if [ $? != 0 ]; then exit 1; fi
 fi
 
-if [ -f "/shared/conf/seafile.env" ]
-then
-    print "Loading environment variables from seafile.env"
-    set -o allexport
-    . /shared/conf/seafile.env
-    set +o allexport
-fi
+load_seafile_env
 
 print "Launching seafile"
 ./seafile-server-latest/seafile.sh start
