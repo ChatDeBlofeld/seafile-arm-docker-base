@@ -111,7 +111,7 @@ function check_memcached() {
 }
 
 function check_notification_server() {
-    if [[ $dbms -eq 0 || $failed -ne 0 || $NOTIFICATION_SERVER_MIN_VERSION -gt $MIN_VERSION ]]; then
+    if [[ $failed -ne 0 || $NOTIFICATION_SERVER_MIN_VERSION -gt $MIN_VERSION ]]; then
         return 0
     fi
 
