@@ -2,9 +2,10 @@
 
 set -Eo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m'
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export ORANGE='\033[0;33m'
+export NC='\033[0m'
 
 print_help() {
     cat <<EOF
