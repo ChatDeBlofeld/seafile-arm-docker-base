@@ -29,6 +29,12 @@ cd /opt/seafile
 
 bind_volumes
 
+if [ -f "/shared/conf/seafevents.conf" ]
+then
+    print "This image does not support seafevents, please remove or rename seafevents.conf"
+    exit 1
+fi
+
 if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$SEAFILE_SERVER_VERSION" ]]
 then
     print "Removing outdated media folder"

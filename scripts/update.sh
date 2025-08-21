@@ -92,27 +92,13 @@ PYTHON_SCRIPT
     print "Write minimal CSRF config"
     url=$(cat "$SEAHUB_CONFIG_FILE" | grep SERVICE_URL | cut -d"=" -f2)
     echo "CSRF_TRUSTED_ORIGINS = [$url]" >> "$SEAHUB_CONFIG_FILE"
-
-    print "Generate seafevents.conf"
-    python3 $INSTALLPATH/pro/pro.py setup --mysql --mysql_host "$MYSQL_HOST" --mysql_port "$MYSQL_PORT" --mysql_user "$MYSQL_USER" --mysql_password "$MYSQL_USER_PASSWD" --mysql_db "$SEAHUB_DB"
-    echo "[DATABASE]"                       >  $SEAFEVENTS_CONFIG_FILE
-    echo "type = mysql"                     >> $SEAFEVENTS_CONFIG_FILE
-    echo "host = $MYSQL_HOST"               >> $SEAFEVENTS_CONFIG_FILE
-    echo "port = $MYSQL_PORT"               >> $SEAFEVENTS_CONFIG_FILE
-    echo "username = $MYSQL_USER"           >> $SEAFEVENTS_CONFIG_FILE
-    echo "password = $MYSQL_USER_PASSWD"    >> $SEAFEVENTS_CONFIG_FILE
-    echo "name = $SEAHUB_DB"                >> $SEAFEVENTS_CONFIG_FILE
-    echo "[SEAHUB EMAIL]"                   >> $SEAFEVENTS_CONFIG_FILE
-    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
-    echo "interval = 30m"                   >> $SEAFEVENTS_CONFIG_FILE
-    echo "[STATISTICS]"                     >> $SEAFEVENTS_CONFIG_FILE
-    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
 fi
 
 if [ "$CURRENT_REVISION" -lt 15 ]; then
     readSeahubConfig
     ccnet_db=$(awk -F '=' '/\[Database\]/{a=1}a==1&&$1~/DB/{print $2;exit}' ${CCNET_CONFIG_FILE} | sed -E "s/[[:space:]]//g")
 
+    print "Write new seafile.env configuration"
     echo "# This file is the equivalent of the .env file mentioned in the Seafile documentation since version 12."   > $SEAFILE_ENV_FILE
     echo "# It is generated for compatibility and smooth upgrades."                                                 >> $SEAFILE_ENV_FILE
     echo "# Remove it if you wan't to set the environment variables directly from docker (e.g. in a compose file)." >> $SEAFILE_ENV_FILE
@@ -125,6 +111,17 @@ if [ "$CURRENT_REVISION" -lt 15 ]; then
     echo "SEAFILE_SERVER_HOSTNAME=${SERVER_IP}"                                                                     >> $SEAFILE_ENV_FILE
     echo "SEAFILE_SERVER_PROTOCOL=${HTTP_PROTO}"                                                                    >> $SEAFILE_ENV_FILE
     echo "TIME_ZONE=${TZ:-UTC}"                                                                                     >> $SEAFILE_ENV_FILE
+
+    if [ -f "$SEAFEVENTS_CONFIG_FILE"]
+    then
+        print "------------------------------------------------------------------------"
+        print "                 SEAFEVENTS SUPPORT HAS BEEN REMOVED"
+        print "Too bloated and contains no core functionality. It will no longer work"
+        print "with this image."
+        print "Old configuration file will be renamed to seafevents.conf.old"
+        print "------------------------------------------------------------------------"
+        mv "$SEAFEVENTS_CONFIG_FILE" "$SEAFEVENTS_CONFIG_FILE.old"
+    fi
 
     print "Update database to Seafile 12 scheme"
     update_db 12.0.0

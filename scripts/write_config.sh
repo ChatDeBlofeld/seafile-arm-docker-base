@@ -88,26 +88,6 @@ function writeWebdavConfiguration() {
     echo "share_name = /seafdav"    >> $WEBDAV_CONFIG_FILE
 }
 
-function writeSeafeventsConfiguration() {
-    # Rewrites everything to disable events by default and, especially,
-    # disable pro features that are not available in community edition
-
-    echo "[DATABASE]"                       >  $SEAFEVENTS_CONFIG_FILE
-    echo "type = mysql"                     >> $SEAFEVENTS_CONFIG_FILE
-    echo "host = $MYSQL_HOST"               >> $SEAFEVENTS_CONFIG_FILE
-    echo "port = $MYSQL_PORT"               >> $SEAFEVENTS_CONFIG_FILE
-    echo "username = $MYSQL_USER"           >> $SEAFEVENTS_CONFIG_FILE
-    echo "password = $MYSQL_USER_PASSWD"    >> $SEAFEVENTS_CONFIG_FILE
-    echo "name = $SEAHUB_DB"                >> $SEAFEVENTS_CONFIG_FILE
-
-    echo "[SEAHUB EMAIL]"                   >> $SEAFEVENTS_CONFIG_FILE
-    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
-    echo "interval = 30m"                   >> $SEAFEVENTS_CONFIG_FILE
-
-    echo "[STATISTICS]"                     >> $SEAFEVENTS_CONFIG_FILE
-    echo "enabled = false"                  >> $SEAFEVENTS_CONFIG_FILE
-}
-
 cd /opt/seafile
 
 echo "Writing Seafile environment"
@@ -121,9 +101,6 @@ writeSeahubConfiguration
 
 echo "Writing seafile configuration"
 writeSeafileConfiguration
-
-echo "Writing seafevents configuration"
-writeSeafeventsConfiguration
 
 if [ "$WEBDAV" = "1" ]; then
     echo "Writing webdav configuration"
