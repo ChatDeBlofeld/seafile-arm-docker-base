@@ -6,6 +6,13 @@ function print() {
     echo "$(date +"%F %T") [Init] $*"
 }
 
+function check_install_success() {
+    if [ "$(grep -Pi 'Your seafile server configuration has been finished successfully.' ${LOGFILE})" != "" ]
+    then
+      INSTALL_CHECKED=1
+    fi
+}
+
 if [ "$SQLITE" != "1" ]
 then
     print "Using MySQL/MariaDB setup"
@@ -67,7 +74,7 @@ then
 fi
 
 # New Seafile 12+ environment variables
-export SEAFILE_MYSQL_DB_HOST="${MYSQL_HOST}:${MYSQL_PORT}"
+export SEAFILE_MYSQL_DB_HOST="${MYSQL_HOST}"
 export SEAFILE_MYSQL_DB_USER="${MYSQL_USER}"
 export SEAFILE_MYSQL_DB_PASSWORD="${MYSQL_USER_PASSWD}"
 export SEAFILE_MYSQL_DB_CCNET_DB_NAME="${CCNET_DB}"
@@ -108,10 +115,12 @@ print "Waiting for db"
 
 print "Running installation script"
 LOGFILE=./install.log
+INSTALL_CHECKED=0
 (set +e; ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile$MYSQL.sh auto -n useless |& tee $LOGFILE; exit 0)
 
 # Handle db starting twice at init edge case
-if [[ "$(grep -Pi '(failed)|(error)' $LOGFILE)" ]]
+check_install_success
+if [ $INSTALL_CHECKED -ne 1 ]
 then
     print "Installation failed. Maybe the db wasn't really ready?"
 
@@ -131,7 +140,8 @@ then
     ./seafile-server-"$SEAFILE_SERVER_VERSION"/setup-seafile-mysql.sh auto -n useless | tee $LOGFILE
 fi
 
-if [ "$(grep -Pi '(failed)|(error)|(missing)' $LOGFILE)" ]
+check_install_success
+if [ $INSTALL_CHECKED -ne 1 ]
 then
     print "Something went wrong"
     exit 1
