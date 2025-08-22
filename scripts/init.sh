@@ -67,6 +67,7 @@ then
 fi
 
 # New Seafile 12+ environment variables
+export SEAFILE_MYSQL_DB_HOST="${MYSQL_HOST}:${MYSQL_PORT}"
 export SEAFILE_MYSQL_DB_USER="${MYSQL_USER}"
 export SEAFILE_MYSQL_DB_PASSWORD="${MYSQL_USER_PASSWD}"
 export SEAFILE_MYSQL_DB_CCNET_DB_NAME="${CCNET_DB}"

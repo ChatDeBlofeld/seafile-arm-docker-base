@@ -14,6 +14,7 @@ function writeSeafileEnv() {
     echo "# This file is the equivalent of the .env file mentioned in the Seafile documentation since version 12."   > $SEAFILE_ENV_FILE
     echo "# It is generated for compatibility and smooth upgrades."                                                 >> $SEAFILE_ENV_FILE
     echo "# Remove it if you wan't to set the environment variables directly from docker (e.g. in a compose file)." >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_HOST=${SEAFILE_MYSQL_DB_HOST}"                                                           >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_USER=${SEAFILE_MYSQL_DB_USER}"                                                           >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_PASSWORD=${SEAFILE_MYSQL_DB_PASSWORD}"                                                   >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_CCNET_DB_NAME=${SEAFILE_MYSQL_DB_CCNET_DB_NAME}"                                         >> $SEAFILE_ENV_FILE
@@ -50,32 +51,10 @@ function writeSeahubConfiguration() {
 function writeSeafileConfiguration() {
     if [ "$NOTIFICATION_SERVER" = "1" ]
     then
-
-        while IFS= read -r line; do
-            if [[ "$line" =~ ^(;|#).*$ ]]; then
-                echo "$line" >> "$SEAFILE_CONFIG_FILE.new"
-                continue
-            elif [[ "$line" =~ ^\[.*\]$ ]]; then
-                section=$(echo $line | sed -n 's#\[\(.*\)\]#\1#p')
-            else
-                key=$(echo $line | cut -d= -f 1 | xargs)
-            fi
-
-            if [ "$section" = "notification" ]; then
-                if [ "$key" = "enabled" ]; then
-                    echo "enabled = true" >> "$SEAFILE_CONFIG_FILE.new"
-                    continue
-                elif [ "$key" = "host" ]; then
-                    echo "host = 0.0.0.0" >> "$SEAFILE_CONFIG_FILE.new"
-                    continue
-                fi
-            fi
-                
-            echo "$line" >> "$SEAFILE_CONFIG_FILE.new"
-        done < "$SEAFILE_CONFIG_FILE"
-
-        rm "$SEAFILE_CONFIG_FILE"
-        mv "$SEAFILE_CONFIG_FILE.new" "$SEAFILE_CONFIG_FILE"
+        echo "[notification]"   >> $SEAFILE_CONFIG_FILE
+        echo "enabled = true"   >> $SEAFILE_CONFIG_FILE
+        echo "host = 0.0.0.0"   >> $SEAFILE_CONFIG_FILE
+        echo "port = 8083"      >> $SEAFILE_CONFIG_FILE
     fi
 }
 
@@ -101,6 +80,9 @@ writeSeahubConfiguration
 
 echo "Writing seafile configuration"
 writeSeafileConfiguration
+
+echo "Removing generated seafevents configuration"
+rm -f $SEAFEVENTS_CONFIG_FILE
 
 if [ "$WEBDAV" = "1" ]; then
     echo "Writing webdav configuration"

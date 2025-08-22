@@ -50,6 +50,8 @@ then
 fi
 
 readSGBD
+NOTIFICATION_SERVER_ENABLED=$(awk -F '=' '/\[notification\]/{a=1}a==1&&$1~/enabled/{print $2;exit}' /shared/conf/seafile.conf | sed -E "s/[[:space:]]//g")
+
 print "Waiting for db"
 /home/seafile/wait_for_db.sh
 
@@ -62,6 +64,13 @@ then
 fi
 
 load_seafile_env
+
+if [ "$NOTIFICATION_SERVER_ENABLED" = "true" ]
+then
+    print "Launching notification server"
+    ./seafile-server-latest/seafile/bin/notification-server -c /shared/conf -l /shared/logs/notification-server.log &
+    sleep 1
+fi
 
 print "Launching seafile"
 ./seafile-server-latest/seafile.sh start
