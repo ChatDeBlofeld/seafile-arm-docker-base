@@ -141,7 +141,7 @@ function check_webdav() {
 
 function clean() {
     print "Cleaning..."
-    $TOPOLOGY_DIR/compose.sh down -v &> /dev/null
+    $TOPOLOGY_DIR/compose.sh down -v --remove-orphans &> /dev/null
 }
 
 function do_tests() {
@@ -317,7 +317,7 @@ export LOGS_FOLDER=$ROOT_DIR/logs/test
 
 sed -i 's/#~//g' compose.seafile.yml
 write_env latest 1 &> /dev/null
-$TOPOLOGY_DIR/compose.sh down -v &> /dev/null
+$TOPOLOGY_DIR/compose.sh down -v --remove-orphans &> /dev/null
 
 echo "Write nginx config"
 config=$TOPOLOGY_DIR/nginx/seafile.noswag.conf
