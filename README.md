@@ -47,7 +47,7 @@ In bridge mode (default), some ports have to be published for the host to reach 
 -p 8000:8000 -p 8082:8082
 ```
 
-The installation is auto-configured and ready to be used behind Apache/Nginx, [as recommended in the manual](https://manual.seafile.com/deploy/using_mysql/#starting-seafile-server-and-seahub-website).
+The installation is auto-configured and ready to be used behind Apache/Nginx.
 
 ### Parameters
 
@@ -60,7 +60,7 @@ All these parameters have to be passed as environment variables. Except for `PUI
 |`TZ`| *(Optional)* Set the timezone of the container. *Default: UTC* |
 |`SERVER_IP`| *(Optional)* IP address **or** domain used to access the Seafile server from the outside. *Default: 127.0.0.1*|
 |`PORT`|*(Optional)* Port used with the `SERVER_IP`. *Default: 80/443*|
-|`USE_HTTPS`|*(Optional)* (0: Unsecured access is used\|1: Secured access is used) Write configuration for https usage. **This has nothing to do with TLS certificates, it only writes some configuration files as you can see [here](https://manual.seafile.com/deploy/https_with_nginx/#modifying-ccnetconf)**. *Default: 0*|
+|`USE_HTTPS`|*(Optional)* (0: Unsecured access is used\|1: Secured access is used) Write configuration for https usage. **This has nothing to do with TLS certificates, it only writes some configuration files**. *Default: 0*|
 |`SEAFILE_ADMIN_EMAIL`|**(Mandatory)** Email address of the admin account.|
 |`SEAFILE_ADMIN_PASSWORD`|**(Mandatory)** Password of the admin account.|
 |`MYSQL_HOST`|*(Optional)* Hostname of the MySQL server. It has to be reachable from within the container, using Docker networks is probably the key here. *Default: 127.0.0.1*|
@@ -82,9 +82,9 @@ You can of course edit the various config files yourself but all configurations 
 
 | Parameter | Description |
 |:-|:-|
-|`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/deploy/add_memcached/).|
-|`WEBDAV`| Set to `1` to enable [webdav](https://manual.seafile.com/extension/webdav/) on port `8080` for location `/seafdav`.|
-|`NOTIFICATION_SERVER`| Set to `1` to enable [notification server](https://manual.seafile.com/config/seafile-conf/#notification-server-configuration) on port `8083`.|
+|`MEMCACHED_HOST`|Host of the memcached server. More in [the manual](https://manual.seafile.com/latest/config/seahub_settings_py/#cache).|
+|`WEBDAV`| Set to `1` to enable [webdav](https://manual.seafile.com/latest/extension/webdav/) on port `8080` for location `/seafdav`.|
+|`NOTIFICATION_SERVER`| Set to `1` to enable [notification server](https://manual.seafile.com/latest/extension/notification-server/) on port `8083`. Note that the notification server requires the database port to be `3306`. [This is currently an upstream limitation](https://github.com/haiwen/seafile-server/blob/v13.0.8-server/notification-server/server.go#L144).|
 
 ### Garbage collection
 
