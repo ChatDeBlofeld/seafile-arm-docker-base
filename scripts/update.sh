@@ -102,6 +102,7 @@ if [ "$CURRENT_REVISION" -lt 15 ]; then
     echo "# This file is the equivalent of the .env file mentioned in the Seafile documentation since version 12."   > $SEAFILE_ENV_FILE
     echo "# It is generated for compatibility and smooth upgrades."                                                 >> $SEAFILE_ENV_FILE
     echo "# Remove it if you wan't to set the environment variables directly from docker (e.g. in a compose file)." >> $SEAFILE_ENV_FILE
+    echo "SEAFILE_MYSQL_DB_HOST=${MYSQL_HOST}"                                                                      >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_USER=${MYSQL_USER}"                                                                      >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_PASSWORD=${MYSQL_USER_PASSWD}"                                                           >> $SEAFILE_ENV_FILE
     echo "SEAFILE_MYSQL_DB_CCNET_DB_NAME=${ccnet_db}"                                                               >> $SEAFILE_ENV_FILE
@@ -112,7 +113,7 @@ if [ "$CURRENT_REVISION" -lt 15 ]; then
     echo "SEAFILE_SERVER_PROTOCOL=${HTTP_PROTO}"                                                                    >> $SEAFILE_ENV_FILE
     echo "TIME_ZONE=${TZ:-UTC}"                                                                                     >> $SEAFILE_ENV_FILE
 
-    if [ -f "$SEAFEVENTS_CONFIG_FILE"]
+    if [ -f "$SEAFEVENTS_CONFIG_FILE" ]
     then
         print "------------------------------------------------------------------------"
         print "                 SEAFEVENTS SUPPORT HAS BEEN REMOVED"
