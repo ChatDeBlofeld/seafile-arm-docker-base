@@ -13,7 +13,7 @@ function print_log() {
 
 # FIXME: implies seahub tests are always the first, should probably be in test.sh
 function wait_for_502() {
-    for i in {1..10}
+    for i in {1..30}
     do
         log=$(curl --no-progress-meter -d "username=$SEAFILE_ADMIN_EMAIL&password=$SEAFILE_ADMIN_PASSWORD" http://$HOST:$PORT/api2/auth-token/ 2>&1)
         if [ "$(echo $log | grep '502 Bad Gateway')" = "" ]
