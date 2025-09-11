@@ -29,6 +29,8 @@ fi
 if [ $PYTHON ]; then
     mkdir -p /haiwen-build/seahub_thirdparty
     if [ -f "$REQUIREMENTS_DIR/python/$TAG.txt" ]; then 
+        # Avoid the hassle of tracking transitive dependencies for the
+        # architecture that have wheels available, does not harm.
         python3 -m pip install -r "$REQUIREMENTS_DIR/python/$TAG.txt" --target /seafile/seahub/thirdpart --no-cache --upgrade
     fi
 
