@@ -110,6 +110,10 @@ do
     mv "$base_dir/seahub/media" "$OUTPUT_DIR/$platform/"
     echo "$SEAFILE_SERVER_VERSION" > "$OUTPUT_DIR/$platform/media/version"
 
+    # Fix seafile monitor logs when seafevents is not present
+    sed -i '235c if [[ \( $CLUSTER_MODE && $CLUSTER_MODE = "backend" ) || ! -f "${seafevents_conf}" ]]; then' "$base_dir/seafile-monitor.sh"
+    sed -i '13i seafevents_conf=${central_config_dir}/seafevents.conf' "$base_dir/seafile-monitor.sh"
+
     # Install needed dependencies
     cmd="/requirements/install.sh -pl $platform && chown -R $(id -u):$(id -g) /seafile/seahub/thirdpart"
     set -x
