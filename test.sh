@@ -83,7 +83,6 @@ function check_gc() {
 
     echo "----------- GC TEST ----------"
     echo "Check if garbage collection works"
-    docker compose stop seafile &> /dev/null
     log=$(docker compose run --rm seafile gc 2>&1 || echo failed_flag)
 
     if [ "$(echo -e $log | grep 'failed_flag')" != "" ]; then
