@@ -55,9 +55,9 @@ function init_new_instance(){
 }
 
 function launch() {
-    $TOPOLOGY_DIR/compose.sh up -d &> /dev/null
+    docker compose up -d &> /dev/null
     if [ $? -ne 0 ]; then
-        $TOPOLOGY_DIR/compose.sh up -d &> $LOGS_FOLDER/launch-$(date +"%s")
+        docker compose up -d &> $LOGS_FOLDER/launch-$(date +"%s")
         return 1
     fi
 
@@ -83,8 +83,8 @@ function check_gc() {
 
     echo "----------- GC TEST ----------"
     echo "Check if garbage collection works"
-    $TOPOLOGY_DIR/compose.sh stop seafile &> /dev/null
-    log=$($TOPOLOGY_DIR/compose.sh run --rm seafile gc 2>&1 || echo failed_flag)
+    docker compose stop seafile &> /dev/null
+    log=$(docker compose run --rm seafile gc 2>&1 || echo failed_flag)
 
     if [ "$(echo -e $log | grep 'failed_flag')" != "" ]; then
         echo "Garbage collection failed"
@@ -100,7 +100,7 @@ function check_memcached() {
 
     echo "------- MEMCACHED TEST -------"
     echo "Check if memcached is configured correctly"
-    memcached_logs=$($TOPOLOGY_DIR/compose.sh logs memcached)
+    memcached_logs=$(docker compose logs memcached)
 
     if [ ! "$(echo $memcached_logs | grep 'STORED')" ]
     then
@@ -141,7 +141,7 @@ function check_webdav() {
 
 function clean() {
     print "Cleaning..."
-    $TOPOLOGY_DIR/compose.sh down -v --remove-orphans &> /dev/null
+    docker compose down -v --remove-orphans &> /dev/null
 }
 
 function do_tests() {
@@ -199,15 +199,19 @@ function do_tests() {
 function write_env() {
     print "Write .env"
 
-    echo "DBMS=$2
-    NOSWAG=1
-    NOSWAG_PORT=$PORT
+    if [ $2 -eq 0 ]; then
+        echo 'COMPOSE_FILE="compose.seafile.yml:compose.db.mariadb.yml:compose.proxy.noswag.yml"' > $TOPOLOGY_DIR/.env
+    else
+        echo 'COMPOSE_FILE="compose.seafile.yml:compose.db.mysql.yml:compose.proxy.noswag.yml"' > $TOPOLOGY_DIR/.env
+    fi
+
+    echo "NOSWAG_PORT=$PORT
     SEAFILE_IMAGE=$IMAGE_FQN:$1
     PUID=$(id -u)
     PGID=$(id -g)
     TZ=Europe/Zurich
-    HOST=$HOST
-    PORT=$PORT
+    SEAFILE_HOST=$HOST
+    SEAFILE_PORT=$PORT
     SEAFILE_ADMIN_EMAIL=$SEAFILE_ADMIN_EMAIL
     SEAFILE_ADMIN_PASSWORD=$SEAFILE_ADMIN_PASSWORD
     USE_HTTPS=0
@@ -221,7 +225,7 @@ function write_env() {
     DATABASE_DIR=db
     WEBDAV=1
     NOTIFICATION_SERVER=1
-    MEMCACHED_HOST=memcached:11211" > $TOPOLOGY_DIR/.env
+    MEMCACHED_HOST=memcached:11211" >> $TOPOLOGY_DIR/.env
 }
 
 echo "Loading environment..."
@@ -317,7 +321,7 @@ export LOGS_FOLDER=$ROOT_DIR/logs/test
 
 sed -i 's/#~//g' compose.seafile.yml
 write_env latest 1 &> /dev/null
-$TOPOLOGY_DIR/compose.sh down -v --remove-orphans &> /dev/null
+docker compose down -v --remove-orphans &> /dev/null
 
 echo "Write nginx config"
 config=$TOPOLOGY_DIR/nginx/seafile.noswag.conf
