@@ -91,17 +91,13 @@ You can of course edit the various config files yourself but all configurations 
 Garbage collection is not integrated (and won't be anytime soon) but can easily be triggered with a cron job on the host. See:
 
 ```bash
-$ docker stop <seafile container>
 $ docker run --rm -v /path/to/seafile/data/:/shared -e PUID=<PUID> -e PGID=<PGID> franchetti/seafile-arm gc
-$ docker start <seafile container>
 ```
 
-Obviously you probably want a compose topology wich makes things even easier:
+Obviously you probably have a compose topology, which makes things even easier:
 
 ```bash
-$ docker compose stop <seafile service>
 $ docker compose run --rm <seafile service> gc
-$ docker compose start <seafile service>
 ```
 
 ## Directory tree
