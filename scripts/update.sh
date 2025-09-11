@@ -81,9 +81,17 @@ from time import sleep
 db=MySQLdb.connect(host="${MYSQL_HOST}", port=${MYSQL_PORT}, user="$MYSQL_USER",
                    password="$MYSQL_USER_PASSWD", database="$SEAHUB_DB")
 cursor=db.cursor()
-cursor.execute("ALTER TABLE org_saml_config ADD COLUMN (domain varchar(255) UNIQUE DEFAULT NULL);")
-db.commit()
-db.close()
+try:
+    cursor.execute("ALTER TABLE org_saml_config ADD COLUMN (domain varchar(255) UNIQUE DEFAULT NULL);")
+    db.commit()
+except Exception as e:
+    if e.args[0]==1060:
+        print("Column domain already exists, skipping")
+    else:
+        print("Error while fixing database:", e)
+        exit(1)
+finally:
+    db.close()
 PYTHON_SCRIPT
 
     print "Update database to Seafile 11 scheme"

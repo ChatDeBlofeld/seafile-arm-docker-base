@@ -61,7 +61,8 @@ function rightsManagement() {
 }
 
 function init() {
-    if [ ! -f "/shared/conf/revision" ]
+    # Legacy check of ccnet dir for versions < 9
+    if [[ ! -f "/shared/conf/ccnet.conf" && ! -f "/shared/conf/revision" ]]
     then
         print "No config found. Running init script"
         su seafile -pPc "/home/seafile/init.sh"
